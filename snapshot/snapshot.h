@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "storage/snapshot_io.h"
-#include "annotation/what.h"
+#include "annotation/annotation.h"
 
 #define SESH_SNAPSHOT_RETRY_DELAY_DEFAULT UINT64_C(1000)
 #define SESH_SNAPSHOT_MAX_ATTEMPTS_DEFAULT UINT32_C(3)

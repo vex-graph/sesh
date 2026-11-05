@@ -1,7 +1,5 @@
 #include "snapshot/snapshot.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 #include <stdio.h>
 #include <string.h>
