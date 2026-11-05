@@ -1,7 +1,7 @@
 # SECURITY.md — sesh
 
 > **Internal invariant set, not a public disclosure channel.** See the
-> [vexgraph security baseline](../../../SECURITY.md) for everything inherited
+> [vexgraph security baseline](../../SECURITY.md) for everything inherited
 > here. This file states only this repository's own surface.
 
 **Role:** R4 session relay. It owns local session composition and explicit
