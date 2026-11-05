@@ -2,7 +2,7 @@
 #define SESH_LANG_AUTH_SERVICE_H
 #include "api/auth.h"
 #include "lang/arity.h"
-#include "annotation/what.h"
+#include "annotation/annotation.h"
 /* Trusted host/API adapter verifies credentials and maps issuer+subject to a
  * canonical nonzero principal ID. Callback must return within bounded slices;
  * false/nonzero mismatch revokes local identity. No OAuth implementation here.
