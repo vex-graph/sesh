@@ -1,8 +1,6 @@
 #include "lang/operations.h"
 #include "session/text.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include <string.h>
 ;;DEFINITION
 /* Operations is a flat copied-intent ledger with explicit host-driven growth.

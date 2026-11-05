@@ -1,7 +1,6 @@
 #include "lang/resource.h"
 #include "session/text.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 ;;DEFINITION
 /* Resource names one workspace-scoped synchronization target and its local
  * revision. It does not own a file, database row, lock, backend or data bytes.
