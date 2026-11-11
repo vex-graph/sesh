@@ -8,7 +8,7 @@
 /* Internal cold formatter: callers supply only metadata, never credentials.
  * Error leaves a terminated prefix when capacity is nonzero. No heap ownership.
  */
-static inline bool SeshText_format(char *dest, size_t cap, bool *outTruncated, const char *format, ...) {
+static inline bool SeshText_format(char *dest, bytes cap, bool *outTruncated, const char *format, ...) {
     if (outTruncated != nullptr)
         *outTruncated = false;
     if (dest == nullptr || cap == 0) {
@@ -25,7 +25,7 @@ static inline bool SeshText_format(char *dest, size_t cap, bool *outTruncated, c
     va_start(args, format);
     int count = vsnprintf(dest, cap, format, args);
     va_end(args);
-    if (count < 0 || (size_t) count >= cap) {
+    if (count < 0 || (bytes) count >= cap) {
         if (outTruncated != nullptr)
             *outTruncated = true;
         THROW("session text: truncated");
@@ -34,7 +34,7 @@ static inline bool SeshText_format(char *dest, size_t cap, bool *outTruncated, c
     return true;
 }
 #define SESH_VALUE_STRING(Class, Expression) \
-    bool Class##_toString(const Class *self, char *dest, size_t cap, bool *outTruncated) { \
+    bool Class##_toString(const Class *self, char *dest, bytes cap, bool *outTruncated) { \
         if (self == nullptr) \
             return SeshText_format(dest, cap, outTruncated, "nullptr"); \
         return Expression; \

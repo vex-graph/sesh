@@ -4,9 +4,9 @@
 #include <assert.h>
 #include <string.h>
 
-static inline bool verify(const ApiAuth *auth, void *context, uint64_t *dest) {
+static inline bool verify(const ApiAuth *auth, void *context, u64 *dest) {
     assert(auth != nullptr && context != nullptr && dest != nullptr);
-    *dest = *(uint64_t*) context;
+    *dest = *(u64*) context;
     return *dest != 0;
 }
 #define PROJECTIONS(Class, object, fieldText) do { \

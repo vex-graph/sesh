@@ -15,22 +15,22 @@
  */
 /* SLOT RECORD: receipt marker is ledger-owned, not caller Operation intent. */
 typedef struct OperationsSlot { Operation operation; bool applied; } OperationsSlot;
-typedef struct Operations { OperationsSlot *items; size_t count; size_t capacity; } Operations;
+typedef struct Operations { OperationsSlot *items; bytes count; bytes capacity; } Operations;
 Operations Operations_0(void);
-Operations Operations_2(OperationsSlot *items, size_t capacity);
+Operations Operations_2(OperationsSlot *items, bytes capacity);
 #define Operations(...) SESH_CONSTRUCT(Operations, __VA_ARGS__)
 #define Operations_zero() Operations_0()
-bool Operations_reserve(Operations *self, OperationsSlot *items, size_t capacity);
+bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity);
 int Operations_add(Operations *self, const Operation *operation);
-bool Operations_find(const Operations *self, uint64_t clientId, uint64_t id, Operation *dest);
-bool Operations_isApplied(const Operations *self, uint64_t clientId, uint64_t id);
+bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *dest);
+bool Operations_isApplied(const Operations *self, u64 clientId, u64 id);
 /* Applies an already-admitted intent to local revision and records its receipt.
  * No data bytes or remote state are changed. Conflict returns 3 without mutation.
  */
 int Operations_apply(Operations *self, const Operation *operation, Resource *resource);
-size_t Operations_getCount(const Operations *self);
-size_t Operations_getCapacity(const Operations *self);
+bytes Operations_getCount(const Operations *self);
+bytes Operations_getCapacity(const Operations *self);
 void Operations_clear(Operations *self);
-bool Operations_toString(const Operations *self, char *dest, size_t cap, bool *outTruncated);
-bool Operations_toStringStruct(const Operations *self, char *dest, size_t cap, bool *outTruncated);
+bool Operations_toString(const Operations *self, char *dest, bytes cap, bool *outTruncated);
+bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated);
 #endif

@@ -1,14 +1,14 @@
 /* Trusted-verifier binding, revocation and secret-free projections. Offline only. */
 #include "support.h"
 /** Accepts the fixture credential and supplies the zero-identity rejection case. */
-static bool verifyZero(const ApiAuth *auth, void *context, uint64_t *dest) {
+static bool verifyZero(const ApiAuth *auth, void *context, u64 *dest) {
     (void) auth; (void) context;
     *dest = 0;
     return true;
 }
 int main(int argc, char **argv) {
     ApiAuth credential = { .kind = API_AUTH_API_KEY, .credential = "DO-NOT-PRINT-SECRET" };
-    uint64_t principal = 7;
+    u64 principal = 7;
     AuthService auth = AuthService(&credential, verify, &principal);
     assert(AuthService_0().principalId == 0 && AuthService().principalId == 0 && AuthService_zero().principalId == 0);
     AuthService direct = AuthService_3(&credential, verify, &principal);

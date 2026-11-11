@@ -9,9 +9,9 @@
 typedef struct Worker {
     Sesh session;
     pthread_mutex_t *mutex;
-    uint64_t clientId;
+    u64 clientId;
     pthread_cond_t *condition;
-    size_t *ready;
+    bytes *ready;
     bool *start;
 } Worker;
 
@@ -24,7 +24,7 @@ static void *submitWorker(void *context) {
     while (!*(*worker).start)
         assert(pthread_cond_wait((*worker).condition, (*worker).mutex) == 0);
     assert(pthread_mutex_unlock((*worker).mutex) == 0);
-    for (uint64_t id = 1; id <= 32; id++) {
+    for (u64 id = 1; id <= 32; id++) {
         assert(pthread_mutex_lock((*worker).mutex) == 0);
         Sesh *session = &(*worker).session;
         Resource *resource = Sesh_getResource(session);
@@ -43,12 +43,12 @@ static void serializedConcurrency(AuthService *auth, Workspace *workspace) {
     Operations ledger = Operations(rows, 128);
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
-    size_t ready = 0;
+    bytes ready = 0;
     bool start = false;
     SeshClient clients[4];
     Worker workers[4];
     pthread_t threads[4];
-    for (size_t i = 0; i < 4; i++) {
+    for (bytes i = 0; i < 4; i++) {
         clients[i] = SeshClient(i + 1);
         workers[i] = (Worker) {Sesh(auth, &clients[i], workspace, &resource, &ledger), &mutex, i + 1, &condition, &ready, &start};
         assert(pthread_create(&threads[i], nullptr, submitWorker, &workers[i]) == 0);
@@ -59,7 +59,7 @@ static void serializedConcurrency(AuthService *auth, Workspace *workspace) {
     start = true;
     assert(pthread_cond_broadcast(&condition) == 0);
     assert(pthread_mutex_unlock(&mutex) == 0);
-    for (size_t i = 0; i < 4; i++)
+    for (bytes i = 0; i < 4; i++)
         assert(pthread_join(threads[i], nullptr) == 0);
     assert(Resource_getRevision(&resource) == 128 && Operations_getCount(&ledger) == 128);
     assert(pthread_mutex_destroy(&mutex) == 0);
@@ -69,7 +69,7 @@ static void serializedConcurrency(AuthService *auth, Workspace *workspace) {
 /* Exercises Sesh composition, valid admission, replay, caller-serialized clients, and optional rejection cases. */
 int main(int argc, char **argv) {
     ApiAuth credential = { .kind = API_AUTH_BEARER, .credential = "NEVER-PRINT-TOKEN" };
-    uint64_t principal = 7;
+    u64 principal = 7;
     AuthService auth = AuthService(&credential, verify, &principal);
     assert(AuthService_authenticate(&auth));
     SeshClient client = SeshClient(2);

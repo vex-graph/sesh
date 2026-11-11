@@ -16,11 +16,11 @@
 ;;OVERVIEW
 /* CLASS: SeshSnapshot
  * STRUCT FIELDS (header order):
- * uint8_t *buffer: borrowed staging bytes; size_t capacity: admitted storage size;
- * size_t length: immutable queued byte count; HavenSnapshotPutFn put: provider;
- * void *context: borrowed provider context; uint64_t key: unique snapshot identity;
- * uint64_t nextAttemptMs: earliest retry; uint64_t retryDelayMs: configurable delay;
- * uint32_t attempts: RETRY outcomes; uint32_t maxAttempts: retry exhaustion bound;
+ * u8 *buffer: borrowed staging bytes; bytes capacity: admitted storage size;
+ * bytes length: immutable queued byte count; HavenSnapshotPutFn put: provider;
+ * void *context: borrowed provider context; u64 key: unique snapshot identity;
+ * u64 nextAttemptMs: earliest retry; u64 retryDelayMs: configurable delay;
+ * u32 attempts: RETRY outcomes; u32 maxAttempts: retry exhaustion bound;
  * int state: idle/queued/saved/failed/cancelled.
  * PUBLIC: _0/zero; setBuffer/setProvider/setRetryPolicy (reject while queued);
  * queue (reject busy, zero key, null nonempty bytes, oversized input);
@@ -50,7 +50,7 @@ SeshSnapshot SeshSnapshot_0(void) {
 }
 
 // Sets borrowed staging storage while idle and clears the queued byte length.
-bool SeshSnapshot_setBuffer(SeshSnapshot *self, uint8_t *buffer, size_t capacity) {
+bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity) {
     if (!configurable(self))
         return false;
     if (buffer == nullptr || capacity == 0) {
@@ -77,7 +77,7 @@ bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, void *
 }
 
 // Sets nonzero retry delay and attempt limit while idle.
-bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, uint64_t delayMs, uint32_t maxAttempts) {
+bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempts) {
     if (!configurable(self))
         return false;
     if (delayMs == 0 || maxAttempts == 0) {
@@ -90,7 +90,7 @@ bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, uint64_t delayMs, uint32_t 
 }
 
 // Copies bytes into staging storage and admits one keyed job if configured and idle.
-bool SeshSnapshot_queue(SeshSnapshot *self, uint64_t key, const uint8_t *bytes, size_t length) {
+bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *bytes, bytes length) {
     if (self == nullptr || key == 0 || (bytes == nullptr && length != 0)) {
         THROW("snapshot queue: invalid input");
         return false;
@@ -111,7 +111,7 @@ bool SeshSnapshot_queue(SeshSnapshot *self, uint64_t key, const uint8_t *bytes, 
 }
 
 // Advances an eligible job once using caller time and the provider's result.
-int SeshSnapshot_step(SeshSnapshot *self, uint64_t nowMs) {
+int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
     if (self == nullptr) {
         THROW("snapshot step: null job");
         return SESH_SNAPSHOT_FAILED;
@@ -153,31 +153,31 @@ void SeshSnapshot_cancel(SeshSnapshot *self) {
         return (*self).field; \
     }
 // Returns the borrowed staging buffer, or nullptr for null self.
-SNAPSHOT_GETTER(const uint8_t *, Buffer, buffer, nullptr)
+SNAPSHOT_GETTER(const u8 *, Buffer, buffer, nullptr)
 // Returns the staging buffer capacity, or zero for null self.
-SNAPSHOT_GETTER(size_t, Capacity, capacity, 0)
+SNAPSHOT_GETTER(bytes, Capacity, capacity, 0)
 // Returns the queued byte length, or zero for null self.
-SNAPSHOT_GETTER(size_t, Length, length, 0)
+SNAPSHOT_GETTER(bytes, Length, length, 0)
 // Returns the provider callback, or nullptr for null self.
 SNAPSHOT_GETTER(HavenSnapshotPutFn, Provider, put, nullptr)
 // Returns the borrowed provider context, or nullptr for null self.
 SNAPSHOT_GETTER(void *, Context, context, nullptr)
 // Returns the snapshot key, or zero for null self.
-SNAPSHOT_GETTER(uint64_t, Key, key, 0)
+SNAPSHOT_GETTER(u64, Key, key, 0)
 // Returns the next eligible retry time, or zero for null self.
-SNAPSHOT_GETTER(uint64_t, NextAttemptMs, nextAttemptMs, 0)
+SNAPSHOT_GETTER(u64, NextAttemptMs, nextAttemptMs, 0)
 // Returns the configured retry delay, or zero for null self.
-SNAPSHOT_GETTER(uint64_t, RetryDelayMs, retryDelayMs, 0)
+SNAPSHOT_GETTER(u64, RetryDelayMs, retryDelayMs, 0)
 // Returns the number of retry outcomes seen, or zero for null self.
-SNAPSHOT_GETTER(uint32_t, Attempts, attempts, 0)
+SNAPSHOT_GETTER(u32, Attempts, attempts, 0)
 // Returns the retry attempt limit, or zero for null self.
-SNAPSHOT_GETTER(uint32_t, MaxAttempts, maxAttempts, 0)
+SNAPSHOT_GETTER(u32, MaxAttempts, maxAttempts, 0)
 // Returns the current job state, or IDLE for null self.
 SNAPSHOT_GETTER(int, State, state, SESH_SNAPSHOT_IDLE)
 #undef SNAPSHOT_GETTER
 
 // Writes either the value summary or one-level field dump into a bounded buffer.
-static bool stringify(const SeshSnapshot *self, bool structure, char *dest, size_t cap, bool *outTruncated) {
+static bool stringify(const SeshSnapshot *self, bool structure, char *dest, bytes cap, bool *outTruncated) {
     if (outTruncated != nullptr)
         *outTruncated = false;
     if (dest == nullptr || cap == 0) {
@@ -198,7 +198,7 @@ static bool stringify(const SeshSnapshot *self, bool structure, char *dest, size
     else
         count = snprintf(dest, cap, "snapshot %llu: %zu bytes, state %d",
                          (unsigned long long) (*self).key, (*self).length, (*self).state);
-    if (count < 0 || (size_t) count >= cap) {
+    if (count < 0 || (bytes) count >= cap) {
         if (outTruncated != nullptr)
             *outTruncated = true;
         THROW("snapshot string: truncated");
@@ -208,11 +208,11 @@ static bool stringify(const SeshSnapshot *self, bool structure, char *dest, size
 }
 
 // Formats the job's key, byte count, and state into a bounded value summary.
-bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, size_t cap, bool *outTruncated) {
+bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated) {
     return stringify(self, false, dest, cap, outTruncated);
 }
 
 // Formats all snapshot fields into a bounded one-level structure summary.
-bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, size_t cap, bool *outTruncated) {
+bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated) {
     return stringify(self, true, dest, cap, outTruncated);
 }

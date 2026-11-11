@@ -85,7 +85,7 @@ int Sesh_submit(Sesh *self, const Operation *operation) {
         if (Operations_isApplied(operations, Operation_getClientId(operation), Operation_getId(operation)))
             return SESH_REPLAY;
     }
-    uint64_t revision = Resource_getRevision(resource);
+    u64 revision = Resource_getRevision(resource);
     if (Operation_getExpectedRevision(operation) != revision) {
         THROW("sesh submit: revision conflict");
         return SESH_CONFLICT;
@@ -106,7 +106,7 @@ void Sesh_close(Sesh *self) {
 // Formats the bound workspace and resource identities as a bounded summary.
 SESH_VALUE_STRING(Sesh, SeshText_format(dest, cap, outTruncated, "sesh workspace %llu resource %llu", (unsigned long long) Workspace_getId((*self).workspace), (unsigned long long) Resource_getId((*self).resource)))
 // Formats bounded one-level VALUE projections of the borrowed components.
-bool Sesh_toStringStruct(const Sesh *self, char *dest, size_t cap, bool *outTruncated) {
+bool Sesh_toStringStruct(const Sesh *self, char *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)
         return SeshText_format(dest, cap, outTruncated, "nullptr");
     /* Safety bound: these child VALUE formats contain only bounded numeric IDs. */

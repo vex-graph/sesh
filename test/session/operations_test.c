@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     assert(Operations_reserve(&operations, grown, 16));
     first[0].operation.id = 99; /* old caller storage is no longer borrowed */
     assert(Operations_find(&operations, 1, 1, &copy) && copy.id == 1);
-    for (uint64_t id = 2; id <= 16; id++) {
+    for (u64 id = 2; id <= 16; id++) {
         value = Operation(id, 1, 1, 1, id);
         assert(Operations_add(&operations, &value) == OPERATIONS_ADDED);
     }

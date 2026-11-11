@@ -8,13 +8,13 @@
  * Host assigns/persists a nonzero installation ID. No hardware/IP identity and
  * no automatic global uniqueness or persistence is claimed. External serialization.
  */
-typedef struct SeshClient { uint64_t id; } SeshClient;
+typedef struct SeshClient { u64 id; } SeshClient;
 SeshClient SeshClient_0(void);
-SeshClient SeshClient_1(uint64_t id);
+SeshClient SeshClient_1(u64 id);
 #define SeshClient(...) SESH_CONSTRUCT(SeshClient, __VA_ARGS__)
 #define SeshClient_zero() SeshClient_0()
-bool SeshClient_setId(SeshClient *self, uint64_t id);
-uint64_t SeshClient_getId(const SeshClient *self);
-bool SeshClient_toString(const SeshClient *self, char *dest, size_t cap, bool *outTruncated);
-bool SeshClient_toStringStruct(const SeshClient *self, char *dest, size_t cap, bool *outTruncated);
+bool SeshClient_setId(SeshClient *self, u64 id);
+u64 SeshClient_getId(const SeshClient *self);
+bool SeshClient_toString(const SeshClient *self, char *dest, bytes cap, bool *outTruncated);
+bool SeshClient_toStringStruct(const SeshClient *self, char *dest, bytes cap, bool *outTruncated);
 #endif

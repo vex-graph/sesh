@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "storage/snapshot_io.h"
-#include "annotation/annotation.h"
+#include "util/annotation.h"
 
 #define SESH_SNAPSHOT_RETRY_DELAY_DEFAULT UINT64_C(1000)
 #define SESH_SNAPSHOT_MAX_ATTEMPTS_DEFAULT UINT32_C(3)
@@ -16,17 +16,17 @@
 #define SESH_SNAPSHOT_CANCELLED 4
 
 typedef struct SeshSnapshot {
-    uint8_t *buffer;
-    size_t capacity;
-    size_t length;
+    u8 *buffer;
+    bytes capacity;
+    bytes length;
     HavenSnapshotPutFn put;
     ;;WHAT("provider-owned opaque snapshot transport context")
     void *context;
-    uint64_t key;
-    uint64_t nextAttemptMs;
-    uint64_t retryDelayMs;
-    uint32_t attempts;
-    uint32_t maxAttempts;
+    u64 key;
+    u64 nextAttemptMs;
+    u64 retryDelayMs;
+    u32 attempts;
+    u32 maxAttempts;
     int state;
 } SeshSnapshot;
 
@@ -41,25 +41,25 @@ typedef struct SeshSnapshot {
 SeshSnapshot SeshSnapshot_0(void);
 #define SeshSnapshot(...) SeshSnapshot_0(__VA_ARGS__)
 #define SeshSnapshot_zero() SeshSnapshot_0()
-bool SeshSnapshot_setBuffer(SeshSnapshot *self, uint8_t *buffer, size_t capacity);
+bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity);
 bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, void *context);
-bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, uint64_t delayMs, uint32_t maxAttempts);
-bool SeshSnapshot_queue(SeshSnapshot *self, uint64_t key, const uint8_t *bytes, size_t length);
-int SeshSnapshot_step(SeshSnapshot *self, uint64_t nowMs);
+bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempts);
+bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *bytes, bytes length);
+int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs);
 /* Quiet bounded teardown: cancel is idempotent and releases provider borrows. */
 void SeshSnapshot_cancel(SeshSnapshot *self);
-const uint8_t *SeshSnapshot_getBuffer(const SeshSnapshot *self);
-size_t SeshSnapshot_getCapacity(const SeshSnapshot *self);
-size_t SeshSnapshot_getLength(const SeshSnapshot *self);
+const u8 *SeshSnapshot_getBuffer(const SeshSnapshot *self);
+bytes SeshSnapshot_getCapacity(const SeshSnapshot *self);
+bytes SeshSnapshot_getLength(const SeshSnapshot *self);
 HavenSnapshotPutFn SeshSnapshot_getProvider(const SeshSnapshot *self);
 void *SeshSnapshot_getContext(const SeshSnapshot *self);
-uint64_t SeshSnapshot_getKey(const SeshSnapshot *self);
-uint64_t SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self);
-uint64_t SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self);
-uint32_t SeshSnapshot_getAttempts(const SeshSnapshot *self);
-uint32_t SeshSnapshot_getMaxAttempts(const SeshSnapshot *self);
+u64 SeshSnapshot_getKey(const SeshSnapshot *self);
+u64 SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self);
+u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self);
+u32 SeshSnapshot_getAttempts(const SeshSnapshot *self);
+u32 SeshSnapshot_getMaxAttempts(const SeshSnapshot *self);
 int SeshSnapshot_getState(const SeshSnapshot *self);
-bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, size_t cap, bool *outTruncated);
-bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, size_t cap, bool *outTruncated);
+bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
+bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
 
 #endif

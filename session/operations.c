@@ -11,7 +11,7 @@
  */
 ;;OVERVIEW
 /* CLASS: Operations. STRUCT FIELDS: OperationsSlot *items: borrowed contiguous rows;
- * size_t count: initialized rows; size_t capacity: current admitted row capacity.
+ * bytes count: initialized rows; bytes capacity: current admitted row capacity.
  * PUBLIC: _0/_2/chooser/zero; reserve (reject null, zero, undersized, overflow);
  * add (copied admission, identical replay, changed-identity rejection, full storage);
  * find (copies output, absence unchanged/quiet, invalid input rejects);
@@ -25,13 +25,13 @@
 // Returns an empty ledger with no borrowed backing storage.
 Operations Operations_0(void) { return (Operations) {0}; }
 // Binds caller-provided storage as the ledger's initial capacity.
-Operations Operations_2(OperationsSlot *items, size_t capacity) {
+Operations Operations_2(OperationsSlot *items, bytes capacity) {
     Operations result = Operations_0();
     Operations_reserve(&result, items, capacity);
     return result;
 }
 // Rebinds to equal-or-larger caller storage, preserving all admitted rows.
-bool Operations_reserve(Operations *self, OperationsSlot *items, size_t capacity) {
+bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity) {
     if (self == nullptr || items == nullptr || capacity == 0 || capacity > SIZE_MAX / sizeof(OperationsSlot)) {
         THROW("operations reserve: invalid storage");
         return false;
@@ -47,12 +47,12 @@ bool Operations_reserve(Operations *self, OperationsSlot *items, size_t capacity
     return true;
 }
 // Finds a client-scoped operation ID and copies it to dest; absence leaves dest unchanged.
-bool Operations_find(const Operations *self, uint64_t clientId, uint64_t id, Operation *dest) {
+bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *dest) {
     if (self == nullptr || dest == nullptr || clientId == 0 || id == 0) {
         THROW("operations find: invalid input");
         return false;
     }
-    for (size_t i = 0; i < (*self).count; i++) {
+    for (bytes i = 0; i < (*self).count; i++) {
         const OperationsSlot *slot = &(*self).items[i];
         const Operation *row = &(*slot).operation;
         if (Operation_getClientId(row) == clientId && Operation_getId(row) == id) {
@@ -86,10 +86,10 @@ int Operations_add(Operations *self, const Operation *operation) {
     return OPERATIONS_ADDED;
 }
 // Reports whether the matching admitted intent has a successful apply receipt.
-bool Operations_isApplied(const Operations *self, uint64_t clientId, uint64_t id) {
+bool Operations_isApplied(const Operations *self, u64 clientId, u64 id) {
     if (self == nullptr)
         return false;
-    for (size_t i = 0; i < (*self).count; i++) {
+    for (bytes i = 0; i < (*self).count; i++) {
         const OperationsSlot *slot = &(*self).items[i];
         const Operation *row = &(*slot).operation;
         if (Operation_getClientId(row) == clientId && Operation_getId(row) == id)
@@ -105,7 +105,7 @@ int Operations_apply(Operations *self, const Operation *operation, Resource *res
         THROW("operations apply: invalid scope");
         return OPERATIONS_REJECTED;
     }
-    for (size_t i = 0; i < (*self).count; i++) {
+    for (bytes i = 0; i < (*self).count; i++) {
         OperationsSlot *slot = &(*self).items[i];
         Operation *row = &(*slot).operation;
         if (Operation_getClientId(row) != Operation_getClientId(operation) || Operation_getId(row) != Operation_getId(operation))
@@ -116,7 +116,7 @@ int Operations_apply(Operations *self, const Operation *operation, Resource *res
         }
         if ((*slot).applied)
             return OPERATIONS_REPLAY;
-        uint64_t revision = Resource_getRevision(resource);
+        u64 revision = Resource_getRevision(resource);
         if (revision != Operation_getExpectedRevision(operation)) {
             THROW("operations apply: revision conflict");
             return OPERATIONS_CONFLICT;
@@ -133,9 +133,9 @@ int Operations_apply(Operations *self, const Operation *operation, Resource *res
     return OPERATIONS_REJECTED;
 }
 // Returns the number of initialized ledger rows, or zero for null.
-SESH_GETTER(Operations, size_t, Count, count, 0)
+SESH_GETTER(Operations, bytes, Count, count, 0)
 // Returns the current caller-provided row capacity, or zero for null.
-SESH_GETTER(Operations, size_t, Capacity, capacity, 0)
+SESH_GETTER(Operations, bytes, Capacity, capacity, 0)
 // Forgets all rows without releasing the borrowed storage; caller must exclude users.
 void Operations_clear(Operations *self) {
     if (self != nullptr)
@@ -144,7 +144,7 @@ void Operations_clear(Operations *self) {
 // Formats the current initialized-row count as a bounded value summary.
 SESH_VALUE_STRING(Operations, SeshText_format(dest, cap, outTruncated, "%zu operations", (*self).count))
 // Formats the backing pointer and ledger counts into a bounded structure summary.
-bool Operations_toStringStruct(const Operations *self, char *dest, size_t cap, bool *outTruncated) {
+bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Operations{items=%p,count=%zu,capacity=%zu}",
                         (void*) (*self).items, (*self).count, (*self).capacity);

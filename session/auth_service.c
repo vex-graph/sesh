@@ -10,7 +10,7 @@
 ;;OVERVIEW
 /* CLASS: AuthService. STRUCT FIELDS: const ApiAuth *auth: borrowed credential
  * descriptor; AuthServiceVerifyFn verifier: trusted bounded identity callback;
- * void *context: borrowed verifier context; uint64_t principalId: admitted identity.
+ * void *context: borrowed verifier context; u64 principalId: admitted identity.
  * PUBLIC: _0/_3/chooser/zero; setAuth/setVerifier/setContext (reject missing required inputs; successful
  * reconfiguration revokes principal); getAuth/Verifier/Context/PrincipalId;
  * isAuthenticated; authenticate (failure revokes); revoke (quiet/idempotent);
@@ -70,7 +70,7 @@ SESH_GETTER(AuthService, AuthServiceVerifyFn, Verifier, verifier, nullptr)
 // Returns the borrowed verifier context, or nullptr for a null service.
 SESH_GETTER(AuthService, void *, Context, context, nullptr)
 // Returns the admitted principal ID, or zero for a null service.
-SESH_GETTER(AuthService, uint64_t, PrincipalId, principalId, 0)
+SESH_GETTER(AuthService, u64, PrincipalId, principalId, 0)
 // Reports whether a nonzero principal has been admitted.
 bool AuthService_isAuthenticated(const AuthService *self) { return AuthService_getPrincipalId(self) != 0; }
 // Clears the admitted principal; null input is ignored.
@@ -85,7 +85,7 @@ bool AuthService_authenticate(AuthService *self) {
         THROW("auth service authenticate: unconfigured");
         return false;
     }
-    uint64_t principalId = 0;
+    u64 principalId = 0;
     if (!(*self).verifier((*self).auth, (*self).context, &principalId) || principalId == 0) {
         AuthService_revoke(self);
         THROW("auth service authenticate: rejected identity");
@@ -97,7 +97,7 @@ bool AuthService_authenticate(AuthService *self) {
 // Formats the admitted principal as a bounded value summary.
 SESH_VALUE_STRING(AuthService, SeshText_format(dest, cap, outTruncated, "principal %llu", (unsigned long long) (*self).principalId))
 // Formats one-level fields while redacting credential and context contents.
-bool AuthService_toStringStruct(const AuthService *self, char *dest, size_t cap, bool *outTruncated) {
+bool AuthService_toStringStruct(const AuthService *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "AuthService{auth=%s,verifier=%s,context=%s,principalId=%llu}",
                         (*self).auth == nullptr ? "nullptr" : "redacted", (*self).verifier == nullptr ? "nullptr" : "bound",

@@ -13,16 +13,16 @@
 #include <string.h>
 
 typedef struct Fake {
-    uint8_t bytes[256];
-    size_t length;
-    uint64_t key;
+    u8 bytes[256];
+    bytes length;
+    u64 key;
     unsigned calls;
     unsigned cancels;
     int result;
 } Fake;
 
 /* Fake provider stores completed snapshots and records cancellation requests. */
-static int put(void *context, uint64_t key, const uint8_t *bytes, size_t length, int cancel) {
+static int put(void *context, u64 key, const u8 *bytes, bytes length, int cancel) {
     Fake *fake = context;
     if (cancel) {
         (*fake).cancels++;
@@ -39,7 +39,7 @@ static int put(void *context, uint64_t key, const uint8_t *bytes, size_t length,
 }
 
 /* Copies a stored snapshot into the caller's buffer when its key and capacity are valid. */
-static int get(void *context, uint64_t key, uint8_t *dest, size_t capacity, size_t *outLength) {
+static int get(void *context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
     Fake *fake = context;
     if (key != (*fake).key || (*fake).length > capacity)
         return HAVEN_SNAPSHOT_REJECT;
@@ -54,7 +54,7 @@ static void normal(const char *fixture) {
     SeshSnapshot direct = SeshSnapshot_0();
     SeshSnapshot zero = SeshSnapshot_zero();
     assert(direct.state == zero.state && zero.state == SESH_SNAPSHOT_IDLE);
-    uint8_t staging[256];
+    u8 staging[256];
     Fake fake = {0};
     assert(SeshSnapshot_setBuffer(&job, staging, sizeof(staging)));
     assert(SeshSnapshot_setProvider(&job, put, &fake));
@@ -69,8 +69,8 @@ static void normal(const char *fixture) {
 
     FILE *file = fopen(fixture, "rb");
     assert(file != nullptr);
-    uint8_t input[256];
-    size_t length = fread(input, 1, sizeof(input), file);
+    u8 input[256];
+    bytes length = fread(input, 1, sizeof(input), file);
     assert(!ferror(file) && length != 0 && length < sizeof(input));
     assert(fgetc(file) == EOF);
     assert(fclose(file) == 0);
@@ -89,7 +89,7 @@ static void normal(const char *fixture) {
     assert(SeshSnapshot_getKey(&job) == 1 && SeshSnapshot_getLength(&job) == length);
     assert(SeshSnapshot_getState(&job) == SESH_SNAPSHOT_SAVED);
     HavenSnapshotGetFn download = get;
-    size_t restored = 0;
+    bytes restored = 0;
     assert(download(&fake, 1, input, sizeof(input), &restored) == HAVEN_SNAPSHOT_DONE);
     assert(restored == length && memcmp(input, staging, length) == 0);
     assert(download(&fake, 1, input, length - 1, &restored) == HAVEN_SNAPSHOT_REJECT);
@@ -99,7 +99,7 @@ static void normal(const char *fixture) {
     assert(SeshSnapshot_step(&job, 11) == SESH_SNAPSHOT_SAVED && fake.calls == calls);
     assert(SeshSnapshot_queue(&job, 2, nullptr, 0));
     assert(SeshSnapshot_step(&job, 0) == SESH_SNAPSHOT_SAVED && fake.length == 0);
-    uint8_t one = 0;
+    u8 one = 0;
     assert(SeshSnapshot_queue(&job, UINT64_MAX, &one, 1));
     assert(SeshSnapshot_step(&job, 0) == SESH_SNAPSHOT_SAVED);
     assert(fake.key == UINT64_MAX && fake.length == 1 && fake.bytes[0] == 0);
@@ -127,7 +127,7 @@ static void normal(const char *fixture) {
     assert(SeshSnapshot_toStringStruct(&job, text, sizeof(text), nullptr));
     const char *fields[] = {"buffer=", "capacity=", "length=", "put=", "context=", "key=", "nextAttemptMs=", "retryDelayMs=", "attempts=", "maxAttempts=", "state="};
     const char *cursor = text;
-    for (size_t i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+    for (bytes i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
         cursor = strstr(cursor, fields[i]);
         assert(cursor != nullptr);
         cursor += strlen(fields[i]);
@@ -140,7 +140,7 @@ static void normal(const char *fixture) {
 /* Checks rejected admissions preserve state, report failures, and permit later valid recovery. */
 static void invalid(void) {
     SeshSnapshot job = SeshSnapshot();
-    uint8_t bytes[2] = {1, 2};
+    u8 bytes[2] = {1, 2};
     Fake fake = { .result = HAVEN_SNAPSHOT_RETRY };
     assert(!SeshSnapshot_setBuffer(nullptr, bytes, 2));
     assert(!SeshSnapshot_setBuffer(&job, nullptr, 2));
