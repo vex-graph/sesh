@@ -1,6 +1,6 @@
+#include "vex.h"
 #include "lang/client.h"
 #include "session/text.h"
-#include "annotation/annotation.h"
 ;;DEFINITION
 /* A SeshClient is one host-assigned installation identity, independent of its
  * network endpoint, account and platform. Value object; no owned resources.

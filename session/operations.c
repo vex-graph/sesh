@@ -1,6 +1,6 @@
+#include "vex.h"
 #include "lang/operations.h"
 #include "session/text.h"
-#include "annotation/annotation.h"
 #include <string.h>
 ;;DEFINITION
 /* Operations is a flat copied-intent ledger with explicit host-driven growth.

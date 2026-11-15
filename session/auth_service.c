@@ -1,6 +1,6 @@
+#include "vex.h"
 #include "lang/auth_service.h"
 #include "session/text.h"
-#include "annotation/annotation.h"
 ;;DEFINITION
 /* AuthService binds borrowed API Haven credentials to a trusted verifier. A
  * principal is admitted only through successful verification, never merely by

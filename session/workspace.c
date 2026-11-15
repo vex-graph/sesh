@@ -1,6 +1,6 @@
+#include "vex.h"
 #include "lang/workspace.h"
 #include "session/text.h"
-#include "annotation/annotation.h"
 ;;DEFINITION
 /* Workspace scopes resources to one authenticated principal in this first
  * private-workspace slice. Host creates/persists identities; no remote ACL proof.

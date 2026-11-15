@@ -1,6 +1,6 @@
+#include "vex.h"
 #include "lang/operation.h"
 #include "session/text.h"
-#include "annotation/annotation.h"
 ;;DEFINITION
 /* Operation carries a client-scoped idempotency identity and workspace/resource
  * scope plus expected local revision. It owns no payload or identity storage.
