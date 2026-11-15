@@ -1,5 +1,7 @@
 #ifndef SESH_LANG_OPERATION_H
 #define SESH_LANG_OPERATION_H
+
+#include "vex.h"
 #include "lang/resource.h"
 /* Immutable intent once copied into Operations: identity is (clientId,id).
  * The first operation form is a local revision advance, not file/SQL payload.
@@ -12,7 +14,7 @@ typedef struct Operation {
     u64 resourceId;
     u64 expectedRevision;
 } Operation;
-Operation Operation_0(void);
+Operation Operation_0();
 Operation Operation_5(u64 id, u64 clientId, u64 workspaceId, u64 resourceId, u64 expectedRevision);
 #define Operation(...) SESH_CONSTRUCT(Operation, __VA_ARGS__)
 #define Operation_zero() Operation_0()

@@ -13,7 +13,7 @@
  * Mutations require external serialization with all Sesh borrowers.
  */
 // Returns an empty workspace with no identity or admitted principal.
-Workspace Workspace_0(void) { return (Workspace) {0}; }
+Workspace Workspace_0() { return (Workspace) {0}; }
 // Constructs a workspace for a nonzero identity and principal.
 Workspace Workspace_2(u64 id, u64 principalId) {
     Workspace result = Workspace_0();

@@ -1,4 +1,6 @@
 /* SeshClient public identity/value owner; host persistence is not implemented. */
+
+#include "vex.h"
 #include "support.h"
 int main(int argc, char **argv) {
     SeshClient client = SeshClient(1);

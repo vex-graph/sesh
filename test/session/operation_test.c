@@ -1,4 +1,6 @@
 /* All operation identity forms, boundaries, equality and copied intent vocabulary. */
+
+#include "vex.h"
 #include "support.h"
 int main(int argc, char **argv) {
     Operation operation = Operation(1, 2, 3, 4, 0);

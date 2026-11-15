@@ -1,4 +1,6 @@
 /* Resource metadata owner; revisions are local externally serialized values. */
+
+#include "vex.h"
 #include "support.h"
 int main(int argc, char **argv) {
     Resource resource = Resource(1, 2, 0);

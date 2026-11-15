@@ -1,36 +1,37 @@
 #ifndef SESH_LANG_AUTH_SERVICE_H
 #define SESH_LANG_AUTH_SERVICE_H
+
+#include "vex.h"
 #include "api/auth.h"
 #include "lang/arity.h"
-#include "util/annotation.h"
 /* Trusted host/API adapter verifies credentials and maps issuer+subject to a
  * canonical nonzero principal ID. Callback must return within bounded slices;
  * false/nonzero mismatch revokes local identity. No OAuth implementation here.
  * Credential pointer and callback context are borrowed; no secrets are printed.
  * Verifier code must stay loaded through invocation; this class owns no reload pin.
  */
-typedef bool (*AuthServiceVerifyFn)(const ApiAuth *auth, void *context, u64 *outPrincipalId);
+typedef bool (*AuthServiceVerifyFn)(const ApiAuth *auth, any context, u64 *outPrincipalId);
 typedef struct AuthService {
     const ApiAuth *auth;
     AuthServiceVerifyFn verifier;
     ;;WHAT("host-owned authentication verifier context")
-    void *context;
+    any context;
     u64 principalId;
 } AuthService;
-AuthService AuthService_0(void);
-AuthService AuthService_3(const ApiAuth *auth, AuthServiceVerifyFn verifier, void *context);
+AuthService AuthService_0();
+AuthService AuthService_3(const ApiAuth *auth, AuthServiceVerifyFn verifier, any context);
 #define AuthService(...) SESH_CONSTRUCT(AuthService, __VA_ARGS__)
 #define AuthService_zero() AuthService_0()
 bool AuthService_setAuth(AuthService *self, const ApiAuth *auth);
-bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, void *context);
-bool AuthService_setContext(AuthService *self, void *context);
+bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, any context);
+bool AuthService_setContext(AuthService *self, any context);
 const ApiAuth *AuthService_getAuth(const AuthService *self);
 AuthServiceVerifyFn AuthService_getVerifier(const AuthService *self);
-void *AuthService_getContext(const AuthService *self);
+any AuthService_getContext(const AuthService *self);
 u64 AuthService_getPrincipalId(const AuthService *self);
 bool AuthService_isAuthenticated(const AuthService *self);
 bool AuthService_authenticate(AuthService *self);
-void AuthService_revoke(AuthService *self);
+fn AuthService_revoke(AuthService *self);
 bool AuthService_toString(const AuthService *self, char *dest, bytes cap, bool *outTruncated);
 bool AuthService_toStringStruct(const AuthService *self, char *dest, bytes cap, bool *outTruncated);
 #endif

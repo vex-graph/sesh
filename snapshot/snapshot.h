@@ -21,7 +21,7 @@ typedef struct SeshSnapshot {
     bytes length;
     HavenSnapshotPutFn put;
     ;;WHAT("provider-owned opaque snapshot transport context")
-    void *context;
+    any context;
     u64 key;
     u64 nextAttemptMs;
     u64 retryDelayMs;
@@ -38,21 +38,21 @@ typedef struct SeshSnapshot {
  * Invalid admission preserves state. Empty snapshots are valid. There is one
  * active snapshot, not a queue ceiling: busy admission explicitly rejects.
  */
-SeshSnapshot SeshSnapshot_0(void);
+SeshSnapshot SeshSnapshot_0();
 #define SeshSnapshot(...) SeshSnapshot_0(__VA_ARGS__)
 #define SeshSnapshot_zero() SeshSnapshot_0()
 bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity);
-bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, void *context);
+bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, any context);
 bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempts);
-bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *bytes, bytes length);
+bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes length);
 int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs);
 /* Quiet bounded teardown: cancel is idempotent and releases provider borrows. */
-void SeshSnapshot_cancel(SeshSnapshot *self);
+fn SeshSnapshot_cancel(SeshSnapshot *self);
 const u8 *SeshSnapshot_getBuffer(const SeshSnapshot *self);
 bytes SeshSnapshot_getCapacity(const SeshSnapshot *self);
 bytes SeshSnapshot_getLength(const SeshSnapshot *self);
 HavenSnapshotPutFn SeshSnapshot_getProvider(const SeshSnapshot *self);
-void *SeshSnapshot_getContext(const SeshSnapshot *self);
+any SeshSnapshot_getContext(const SeshSnapshot *self);
 u64 SeshSnapshot_getKey(const SeshSnapshot *self);
 u64 SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self);
 u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self);

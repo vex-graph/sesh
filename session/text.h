@@ -1,10 +1,9 @@
 #ifndef SESH_SESSION_TEXT_H
 #define SESH_SESSION_TEXT_H
-#include <stdbool.h>
-#include <stddef.h>
+
+#include "vex.h"
 #include <stdarg.h>
 #include <stdio.h>
-#include "exception/throw.h"
 /* Internal cold formatter: callers supply only metadata, never credentials.
  * Error leaves a terminated prefix when capacity is nonzero. No heap ownership.
  */

@@ -1,5 +1,7 @@
 /* Internal bounded formatter owner: optional flag, exact capacity, escaping
  * responsibility at caller (only numeric/public metadata currently supplied). */
+
+#include "vex.h"
 #include "session/text.h"
 #include <assert.h>
 #include <string.h>

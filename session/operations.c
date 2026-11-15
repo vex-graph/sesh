@@ -23,7 +23,7 @@
  */
 ;;INTENTION("per the Conflict Triage Law + Single Class Per File Law (Java Law): reserve/add/clear own backing/count updates; no scalar setter may forge deduplication history")
 // Returns an empty ledger with no borrowed backing storage.
-Operations Operations_0(void) { return (Operations) {0}; }
+Operations Operations_0() { return (Operations) {0}; }
 // Binds caller-provided storage as the ledger's initial capacity.
 Operations Operations_2(OperationsSlot *items, bytes capacity) {
     Operations result = Operations_0();
@@ -137,7 +137,7 @@ SESH_GETTER(Operations, bytes, Count, count, 0)
 // Returns the current caller-provided row capacity, or zero for null.
 SESH_GETTER(Operations, bytes, Capacity, capacity, 0)
 // Forgets all rows without releasing the borrowed storage; caller must exclude users.
-void Operations_clear(Operations *self) {
+fn Operations_clear(Operations *self) {
     if (self != nullptr)
         (*self).count = 0;
 }
@@ -147,5 +147,5 @@ SESH_VALUE_STRING(Operations, SeshText_format(dest, cap, outTruncated, "%zu oper
 bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Operations{items=%p,count=%zu,capacity=%zu}",
-                        (void*) (*self).items, (*self).count, (*self).capacity);
+                        (any) (*self).items, (*self).count, (*self).capacity);
 }

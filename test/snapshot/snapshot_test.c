@@ -6,6 +6,8 @@
  * not Google or durable disk. Thread safety, stale pointer admission, schema
  * migration and concurrent merge are not offered. Storage is caller-owned.
  */
+
+#include "vex.h"
 #include "snapshot/snapshot.h"
 #include <assert.h>
 #include <stdio.h>
@@ -22,7 +24,7 @@ typedef struct Fake {
 } Fake;
 
 /* Fake provider stores completed snapshots and records cancellation requests. */
-static int put(void *context, u64 key, const u8 *bytes, bytes length, int cancel) {
+static int put(any context, u64 key, const u8 *data, bytes length, int cancel) {
     Fake *fake = context;
     if (cancel) {
         (*fake).cancels++;
@@ -31,7 +33,7 @@ static int put(void *context, u64 key, const u8 *bytes, bytes length, int cancel
     (*fake).calls++;
     assert(length <= sizeof((*fake).bytes));
     if ((*fake).result == HAVEN_SNAPSHOT_DONE) {
-        memcpy((*fake).bytes, bytes, length);
+        memcpy((*fake).bytes, data, length);
         (*fake).length = length;
         (*fake).key = key;
     }
@@ -39,7 +41,7 @@ static int put(void *context, u64 key, const u8 *bytes, bytes length, int cancel
 }
 
 /* Copies a stored snapshot into the caller's buffer when its key and capacity are valid. */
-static int get(void *context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
+static int get(any context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
     Fake *fake = context;
     if (key != (*fake).key || (*fake).length > capacity)
         return HAVEN_SNAPSHOT_REJECT;
@@ -49,7 +51,7 @@ static int get(void *context, u64 key, u8 *dest, bytes capacity, bytes *outLengt
 }
 
 /* Covers public configuration, fixture round-trip, retry timing, cancellation, boundaries, and projections. */
-static void normal(const char *fixture) {
+static fn normal(const char *fixture) {
     SeshSnapshot job = SeshSnapshot();
     SeshSnapshot direct = SeshSnapshot_0();
     SeshSnapshot zero = SeshSnapshot_zero();
@@ -138,7 +140,7 @@ static void normal(const char *fixture) {
 }
 
 /* Checks rejected admissions preserve state, report failures, and permit later valid recovery. */
-static void invalid(void) {
+static fn invalid() {
     SeshSnapshot job = SeshSnapshot();
     u8 bytes[2] = {1, 2};
     Fake fake = { .result = HAVEN_SNAPSHOT_RETRY };

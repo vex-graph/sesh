@@ -16,7 +16,7 @@
  * No private helpers. Setters preserve rejection state; external serialization.
  */
 // Returns an empty operation value with all identity fields unset.
-Operation Operation_0(void) { return (Operation) {0}; }
+Operation Operation_0() { return (Operation) {0}; }
 // Constructs an operation when all required scope IDs are nonzero.
 Operation Operation_5(u64 id, u64 clientId, u64 workspaceId, u64 resourceId, u64 expectedRevision) {
     Operation result = {id, clientId, workspaceId, resourceId, expectedRevision};

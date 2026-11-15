@@ -1,5 +1,7 @@
 #ifndef SESH_LANG_SESH_H
 #define SESH_LANG_SESH_H
+
+#include "vex.h"
 #include "lang/auth_service.h"
 #include "lang/client.h"
 #include "lang/workspace.h"
@@ -26,7 +28,7 @@ typedef struct Sesh {
 } Sesh;
 
 
-Sesh Sesh_0(void);
+Sesh Sesh_0();
 Sesh Sesh_5(AuthService *authService, SeshClient *client, Workspace *workspace, Resource *resource, Operations *operations);
 #define Sesh(...) SESH_CONSTRUCT(Sesh, __VA_ARGS__)
 #define Sesh_zero() Sesh_0()
@@ -41,7 +43,7 @@ Workspace *Sesh_getWorkspace(const Sesh *self);
 Resource *Sesh_getResource(const Sesh *self);
 Operations *Sesh_getOperations(const Sesh *self);
 int Sesh_submit(Sesh *self, const Operation *operation);
-void Sesh_close(Sesh *self);
+fn Sesh_close(Sesh *self);
 bool Sesh_toString(const Sesh *self, char *dest, bytes cap, bool *outTruncated);
 bool Sesh_toStringStruct(const Sesh *self, char *dest, bytes cap, bool *outTruncated);
 #endif

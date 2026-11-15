@@ -21,7 +21,7 @@
  * No private helpers. Every shared component requires external serialization.
  */
 // Returns an unbound session composition.
-Sesh Sesh_0(void) { return (Sesh) {0}; }
+Sesh Sesh_0() { return (Sesh) {0}; }
 // Binds all borrowed components; rejects any missing component.
 Sesh Sesh_5(AuthService *authService, SeshClient *client, Workspace *workspace, Resource *resource, Operations *operations) {
     if (authService == nullptr || client == nullptr || workspace == nullptr || resource == nullptr || operations == nullptr) {
@@ -99,7 +99,7 @@ int Sesh_submit(Sesh *self, const Operation *operation) {
     return Operations_apply(operations, operation, resource) == OPERATIONS_ADDED ? SESH_APPLIED : SESH_REJECTED;
 }
 // Detaches all borrowed components without destroying or mutating them.
-void Sesh_close(Sesh *self) {
+fn Sesh_close(Sesh *self) {
     if (self != nullptr)
         *self = Sesh_0();
 }

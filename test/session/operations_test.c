@@ -1,5 +1,7 @@
 /* Flat ledger owner: growth, copied admission, replay/reuse, preserved outputs.
  * No arbitrary-pointer rejection, allocation ownership or concurrency promised. */
+
+#include "vex.h"
 #include "support.h"
 int main(int argc, char **argv) {
     OperationsSlot first[1], grown[16];

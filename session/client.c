@@ -12,7 +12,7 @@
  * toString/toStringStruct. No private helpers. Externally serialized.
  */
 // Returns the empty client value, whose installation ID is zero.
-SeshClient SeshClient_0(void) { return (SeshClient) {0}; }
+SeshClient SeshClient_0() { return (SeshClient) {0}; }
 // Constructs a client with the supplied nonzero installation ID.
 SeshClient SeshClient_1(u64 id) {
     SeshClient result = SeshClient_0();

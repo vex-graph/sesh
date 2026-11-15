@@ -18,7 +18,7 @@
  * STRUCT FIELDS (header order):
  * u8 *buffer: borrowed staging bytes; bytes capacity: admitted storage size;
  * bytes length: immutable queued byte count; HavenSnapshotPutFn put: provider;
- * void *context: borrowed provider context; u64 key: unique snapshot identity;
+ * any context: borrowed provider context; u64 key: unique snapshot identity;
  * u64 nextAttemptMs: earliest retry; u64 retryDelayMs: configurable delay;
  * u32 attempts: RETRY outcomes; u32 maxAttempts: retry exhaustion bound;
  * int state: idle/queued/saved/failed/cancelled.
@@ -44,7 +44,7 @@ static bool configurable(SeshSnapshot *self) {
 }
 
 // Returns an idle job with the documented default retry delay and attempt limit.
-SeshSnapshot SeshSnapshot_0(void) {
+SeshSnapshot SeshSnapshot_0() {
     return (SeshSnapshot) { .retryDelayMs = SESH_SNAPSHOT_RETRY_DELAY_DEFAULT,
                            .maxAttempts = SESH_SNAPSHOT_MAX_ATTEMPTS_DEFAULT };
 }
@@ -64,7 +64,7 @@ bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity) {
 }
 
 // Sets the provider callback and borrowed context while idle.
-bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, void *context) {
+bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, any context) {
     if (!configurable(self))
         return false;
     if (put == nullptr) {
@@ -90,8 +90,8 @@ bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempt
 }
 
 // Copies bytes into staging storage and admits one keyed job if configured and idle.
-bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *bytes, bytes length) {
-    if (self == nullptr || key == 0 || (bytes == nullptr && length != 0)) {
+bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes length) {
+    if (self == nullptr || key == 0 || (data == nullptr && length != 0)) {
         THROW("snapshot queue: invalid input");
         return false;
     }
@@ -101,7 +101,7 @@ bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *bytes, bytes leng
         return false;
     }
     if (length != 0)
-        memmove((*self).buffer, bytes, length);
+        memmove((*self).buffer, data, length);
     (*self).length = length;
     (*self).key = key;
     (*self).attempts = 0;
@@ -138,7 +138,7 @@ int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
 }
 
 // Cancels a queued job through the provider; null and inactive jobs are ignored.
-void SeshSnapshot_cancel(SeshSnapshot *self) {
+fn SeshSnapshot_cancel(SeshSnapshot *self) {
     if (self == nullptr || (*self).state != SESH_SNAPSHOT_QUEUED)
         return;
     (*self).put((*self).context, (*self).key, (*self).buffer, (*self).length, 1);
@@ -161,7 +161,7 @@ SNAPSHOT_GETTER(bytes, Length, length, 0)
 // Returns the provider callback, or nullptr for null self.
 SNAPSHOT_GETTER(HavenSnapshotPutFn, Provider, put, nullptr)
 // Returns the borrowed provider context, or nullptr for null self.
-SNAPSHOT_GETTER(void *, Context, context, nullptr)
+SNAPSHOT_GETTER(any , Context, context, nullptr)
 // Returns the snapshot key, or zero for null self.
 SNAPSHOT_GETTER(u64, Key, key, 0)
 // Returns the next eligible retry time, or zero for null self.
@@ -191,7 +191,7 @@ static bool stringify(const SeshSnapshot *self, bool structure, char *dest, byte
         count = snprintf(dest, cap, "nullptr");
     else if (structure)
         count = snprintf(dest, cap, "SeshSnapshot{buffer=%p,capacity=%zu,length=%zu,put=%s,context=%p,key=%llu,nextAttemptMs=%llu,retryDelayMs=%llu,attempts=%u,maxAttempts=%u,state=%d}",
-                         (void*) (*self).buffer, (*self).capacity, (*self).length,
+                         (any) (*self).buffer, (*self).capacity, (*self).length,
                          (*self).put == nullptr ? "nullptr" : "bound", (*self).context,
                          (unsigned long long) (*self).key, (unsigned long long) (*self).nextAttemptMs,
                          (unsigned long long) (*self).retryDelayMs, (*self).attempts, (*self).maxAttempts, (*self).state);

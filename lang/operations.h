@@ -1,5 +1,7 @@
 #ifndef SESH_LANG_OPERATIONS_H
 #define SESH_LANG_OPERATIONS_H
+
+#include "vex.h"
 #include "lang/operation.h"
 #define OPERATIONS_REJECTED 0
 #define OPERATIONS_ADDED 1
@@ -16,7 +18,7 @@
 /* SLOT RECORD: receipt marker is ledger-owned, not caller Operation intent. */
 typedef struct OperationsSlot { Operation operation; bool applied; } OperationsSlot;
 typedef struct Operations { OperationsSlot *items; bytes count; bytes capacity; } Operations;
-Operations Operations_0(void);
+Operations Operations_0();
 Operations Operations_2(OperationsSlot *items, bytes capacity);
 #define Operations(...) SESH_CONSTRUCT(Operations, __VA_ARGS__)
 #define Operations_zero() Operations_0()
@@ -30,7 +32,7 @@ bool Operations_isApplied(const Operations *self, u64 clientId, u64 id);
 int Operations_apply(Operations *self, const Operation *operation, Resource *resource);
 bytes Operations_getCount(const Operations *self);
 bytes Operations_getCapacity(const Operations *self);
-void Operations_clear(Operations *self);
+fn Operations_clear(Operations *self);
 bool Operations_toString(const Operations *self, char *dest, bytes cap, bool *outTruncated);
 bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated);
 #endif

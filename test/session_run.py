@@ -65,11 +65,11 @@ with tempfile.TemporaryDirectory(prefix="sesh-classes-", dir=os.environ.get("TMP
                                         ("AuthService", 1), ("AuthService", 4), ("Sesh", 1), ("Sesh", 6)):
                 probe = directory / "unsupported.c"
                 args = ",".join("1" for _ in range(invalid_count))
-                probe.write_text(f'#include "lang/sesh.h"\nint main(void) {{ {name} x = {name}({args}); (void)x; }}\n')
+                probe.write_text(f'#include "lang/sesh.h"\nint main() {{ {name} x = {name}({args}); ()x; }}\n')
                 result = subprocess.run([*flags, "-fsyntax-only", str(probe)], capture_output=True, text=True, timeout=15)
                 assert result.returncode != 0 and f"{name}_{invalid_count}" in result.stderr, result.stderr
             probe = directory / "wrong-type.c"
-            probe.write_text('#include "graphics/render_loop.h"\n#include "lang/sesh.h"\nint main(void) { Client graphics = {0}; SeshClient *session = &graphics; (void)session; }\n')
+            probe.write_text('#include "graphics/render_loop.h"\n#include "lang/sesh.h"\nint main() { Client graphics = {0}; SeshClient *session = &graphics; ()session; }\n')
             result = subprocess.run([*flags, "-fsyntax-only", str(probe)], capture_output=True, text=True, timeout=15)
             assert result.returncode != 0 and "incompatible pointer types" in result.stderr, result.stderr
 print("PASS: seven classes + formatter/arity/interop owners; local serialized metadata only, no distributed/provider proof")

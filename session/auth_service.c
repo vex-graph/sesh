@@ -10,7 +10,7 @@
 ;;OVERVIEW
 /* CLASS: AuthService. STRUCT FIELDS: const ApiAuth *auth: borrowed credential
  * descriptor; AuthServiceVerifyFn verifier: trusted bounded identity callback;
- * void *context: borrowed verifier context; u64 principalId: admitted identity.
+ * any context: borrowed verifier context; u64 principalId: admitted identity.
  * PUBLIC: _0/_3/chooser/zero; setAuth/setVerifier/setContext (reject missing required inputs; successful
  * reconfiguration revokes principal); getAuth/Verifier/Context/PrincipalId;
  * isAuthenticated; authenticate (failure revokes); revoke (quiet/idempotent);
@@ -19,9 +19,9 @@
  */
 ;;INTENTION("per the Conflict Triage Law + Single Class Per File Law (Java Law): principalId has no arbitrary setter; authenticate/revoke alone establish verification state")
 // Returns an empty service with no credentials, verifier, or admitted principal.
-AuthService AuthService_0(void) { return (AuthService) {0}; }
+AuthService AuthService_0() { return (AuthService) {0}; }
 // Binds borrowed credentials and verifier state; rejects missing required inputs.
-AuthService AuthService_3(const ApiAuth *auth, AuthServiceVerifyFn verifier, void *context) {
+AuthService AuthService_3(const ApiAuth *auth, AuthServiceVerifyFn verifier, any context) {
     AuthService result = AuthService_0();
     if (auth == nullptr || verifier == nullptr) {
         THROW("auth service: missing credential or verifier");
@@ -43,7 +43,7 @@ bool AuthService_setAuth(AuthService *self, const ApiAuth *auth) {
     return true;
 }
 // Replaces the verifier and its borrowed context, revoking the current identity.
-bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, void *context) {
+bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, any context) {
     if (self == nullptr || verifier == nullptr) {
         THROW("auth service verifier: null input");
         return false;
@@ -54,7 +54,7 @@ bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, vo
     return true;
 }
 // Replaces the borrowed verifier context and revokes the current identity.
-bool AuthService_setContext(AuthService *self, void *context) {
+bool AuthService_setContext(AuthService *self, any context) {
     if (self == nullptr) {
         THROW("auth service context: null service");
         return false;
@@ -68,13 +68,13 @@ SESH_GETTER(AuthService, const ApiAuth *, Auth, auth, nullptr)
 // Returns the configured verifier callback, or nullptr for a null service.
 SESH_GETTER(AuthService, AuthServiceVerifyFn, Verifier, verifier, nullptr)
 // Returns the borrowed verifier context, or nullptr for a null service.
-SESH_GETTER(AuthService, void *, Context, context, nullptr)
+SESH_GETTER(AuthService, any , Context, context, nullptr)
 // Returns the admitted principal ID, or zero for a null service.
 SESH_GETTER(AuthService, u64, PrincipalId, principalId, 0)
 // Reports whether a nonzero principal has been admitted.
 bool AuthService_isAuthenticated(const AuthService *self) { return AuthService_getPrincipalId(self) != 0; }
 // Clears the admitted principal; null input is ignored.
-void AuthService_revoke(AuthService *self) {
+fn AuthService_revoke(AuthService *self) {
     if (self != nullptr)
         (*self).principalId = 0;
 }

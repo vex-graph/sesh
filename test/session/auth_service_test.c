@@ -1,8 +1,10 @@
 /* Trusted-verifier binding, revocation and secret-free projections. Offline only. */
+
+#include "vex.h"
 #include "support.h"
 /** Accepts the fixture credential and supplies the zero-identity rejection case. */
-static bool verifyZero(const ApiAuth *auth, void *context, u64 *dest) {
-    (void) auth; (void) context;
+static bool verifyZero(const ApiAuth *auth, any context, u64 *dest) {
+    (discard) auth; (discard) context;
     *dest = 0;
     return true;
 }

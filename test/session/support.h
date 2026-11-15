@@ -1,10 +1,12 @@
 #ifndef SESH_OWNER_SUPPORT_H
 #define SESH_OWNER_SUPPORT_H
+
+#include "vex.h"
 #include "lang/sesh.h"
 #include <assert.h>
 #include <string.h>
 
-static inline bool verify(const ApiAuth *auth, void *context, u64 *dest) {
+static inline bool verify(const ApiAuth *auth, any context, u64 *dest) {
     assert(auth != nullptr && context != nullptr && dest != nullptr);
     *dest = *(u64*) context;
     return *dest != 0;

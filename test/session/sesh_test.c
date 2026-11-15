@@ -3,6 +3,8 @@
  * Multiple Sesh objects share state only under one caller-owned serialization
  * domain. This tests local metadata, not OAuth, data sync or distributed CAS.
  */
+
+#include "vex.h"
 #include "support.h"
 #include <pthread.h>
 
@@ -16,7 +18,7 @@ typedef struct Worker {
 } Worker;
 
 /* Applies and immediately replays 32 operations while holding the caller's shared serialization mutex. */
-static void *submitWorker(void *context) {
+static any submitWorker(any context) {
     Worker *worker = context;
     assert(pthread_mutex_lock((*worker).mutex) == 0);
     ++*(*worker).ready;
@@ -37,7 +39,7 @@ static void *submitWorker(void *context) {
 }
 
 /* Starts four clients together and verifies serialized application and replay accounting. */
-static void serializedConcurrency(AuthService *auth, Workspace *workspace) {
+static fn serializedConcurrency(AuthService *auth, Workspace *workspace) {
     Resource resource = Resource(4, 3, 0);
     OperationsSlot rows[128];
     Operations ledger = Operations(rows, 128);

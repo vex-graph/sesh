@@ -14,7 +14,7 @@
  * All mutations require external serialization with sessions and consumers.
  */
 // Returns an empty resource with no identity or workspace scope.
-Resource Resource_0(void) { return (Resource) {0}; }
+Resource Resource_0() { return (Resource) {0}; }
 // Constructs a workspace-scoped resource with its supplied local revision.
 Resource Resource_3(u64 id, u64 workspaceId, u64 revision) {
     Resource result = Resource_0();

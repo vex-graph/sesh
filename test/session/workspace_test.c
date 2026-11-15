@@ -1,4 +1,6 @@
 /* Private-workspace identity owner; no remote ACL verification claim. */
+
+#include "vex.h"
 #include "support.h"
 int main(int argc, char **argv) {
     Workspace workspace = Workspace(1, 2);

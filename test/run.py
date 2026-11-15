@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory(prefix="sesh-owner-", dir=os.environ.get("TMPDI
             print(mode + ": " + result.stdout.strip())
         # Unsupported arity must fail specifically at the constructor.
         probe = Path(directory) / "arity.c"
-        probe.write_text('#include "snapshot/snapshot.h"\nint main(void) { SeshSnapshot x = SeshSnapshot(1); (void)x; }\n')
+        probe.write_text('#include "snapshot/snapshot.h"\nint main() { SeshSnapshot x = SeshSnapshot(1); ()x; }\n')
         result = subprocess.run(command[:-4] + ["-fsyntax-only", str(probe)], capture_output=True, text=True, timeout=10)
         assert result.returncode != 0 and "too many arguments" in result.stderr, result.stderr
 print("PASS: strict + ASan/UBSan, offline only; no engine/Drive/iCloud/durable-journal proof")
