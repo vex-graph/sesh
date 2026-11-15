@@ -5,7 +5,7 @@
 #include "session/text.h"
 #include <assert.h>
 #include <string.h>
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     char text[5]; bool truncated = true;
     assert(SeshText_format(text, sizeof(text), &truncated, "%s", "text") && !truncated);
     assert(strcmp(text, "text") == 0);

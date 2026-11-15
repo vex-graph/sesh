@@ -63,7 +63,7 @@ bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *de
     return false;
 }
 // Copies new intent, reports identical replay, and rejects changed or full admissions.
-int Operations_add(Operations *self, const Operation *operation) {
+i32 Operations_add(Operations *self, const Operation *operation) {
     if (self == nullptr || !Operation_isValid(operation)) {
         THROW("operations add: invalid operation");
         return OPERATIONS_REJECTED;
@@ -98,7 +98,7 @@ bool Operations_isApplied(const Operations *self, u64 clientId, u64 id) {
     return false;
 }
 // Applies admitted intent once when scope and expected revision match the resource.
-int Operations_apply(Operations *self, const Operation *operation, Resource *resource) {
+i32 Operations_apply(Operations *self, const Operation *operation, Resource *resource) {
     if (self == nullptr || !Operation_isValid(operation) || resource == nullptr ||
         Operation_getResourceId(operation) != Resource_getId(resource) ||
         Operation_getWorkspaceId(operation) != Resource_getWorkspaceId(resource)) {

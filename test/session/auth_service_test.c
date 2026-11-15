@@ -8,7 +8,7 @@ static bool verifyZero(const ApiAuth *auth, any context, u64 *dest) {
     *dest = 0;
     return true;
 }
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     ApiAuth credential = { .kind = API_AUTH_API_KEY, .credential = "DO-NOT-PRINT-SECRET" };
     u64 principal = 7;
     AuthService auth = AuthService(&credential, verify, &principal);

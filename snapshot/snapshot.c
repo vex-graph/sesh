@@ -20,7 +20,7 @@
  * any context: borrowed provider context; u64 key: unique snapshot identity;
  * u64 nextAttemptMs: earliest retry; u64 retryDelayMs: configurable delay;
  * u32 attempts: RETRY outcomes; u32 maxAttempts: retry exhaustion bound;
- * int state: idle/queued/saved/failed/cancelled.
+ * i32 state: idle/queued/saved/failed/cancelled.
  * PUBLIC: _0/zero; setBuffer/setProvider/setRetryPolicy (reject while queued);
  * queue (reject busy, zero key, null nonempty bytes, oversized input);
  * step (pending/retry/durable done/terminal reject); cancel (quiet idempotent);
@@ -110,14 +110,14 @@ bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes lengt
 }
 
 // Advances an eligible job once using caller time and the provider's result.
-int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
+i32 SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
     if (self == nullptr) {
         THROW("snapshot step: null job");
         return SESH_SNAPSHOT_FAILED;
     }
     if ((*self).state != SESH_SNAPSHOT_QUEUED || nowMs < (*self).nextAttemptMs)
         return (*self).state;
-    int result = (*self).put((*self).context, (*self).key, (*self).buffer, (*self).length, 0);
+    i32 result = (*self).put((*self).context, (*self).key, (*self).buffer, (*self).length, 0);
     if (result == HAVEN_SNAPSHOT_DONE)
         (*self).state = SESH_SNAPSHOT_SAVED;
     else if (result == HAVEN_SNAPSHOT_RETRY) {
@@ -172,7 +172,7 @@ SNAPSHOT_GETTER(u32, Attempts, attempts, 0)
 // Returns the retry attempt limit, or zero for null self.
 SNAPSHOT_GETTER(u32, MaxAttempts, maxAttempts, 0)
 // Returns the current job state, or IDLE for null self.
-SNAPSHOT_GETTER(int, State, state, SESH_SNAPSHOT_IDLE)
+SNAPSHOT_GETTER(i32, State, state, SESH_SNAPSHOT_IDLE)
 #undef SNAPSHOT_GETTER
 
 // Writes either the value summary or one-level field dump into a bounded buffer.
@@ -185,18 +185,18 @@ static bool stringify(const SeshSnapshot *self, bool structure, char *dest, byte
         THROW("snapshot string: missing destination");
         return false;
     }
-    int count;
+    i32 count;
     if (self == nullptr)
         count = snprintf(dest, cap, "nullptr");
     else if (structure)
         count = snprintf(dest, cap, "SeshSnapshot{buffer=%p,capacity=%zu,length=%zu,put=%s,context=%p,key=%llu,nextAttemptMs=%llu,retryDelayMs=%llu,attempts=%u,maxAttempts=%u,state=%d}",
                          (any) (*self).buffer, (*self).capacity, (*self).length,
                          (*self).put == nullptr ? "nullptr" : "bound", (*self).context,
-                         (unsigned long long) (*self).key, (unsigned long long) (*self).nextAttemptMs,
-                         (unsigned long long) (*self).retryDelayMs, (*self).attempts, (*self).maxAttempts, (*self).state);
+                         (u64) (*self).key, (u64) (*self).nextAttemptMs,
+                         (u64) (*self).retryDelayMs, (*self).attempts, (*self).maxAttempts, (*self).state);
     else
         count = snprintf(dest, cap, "snapshot %llu: %zu bytes, state %d",
-                         (unsigned long long) (*self).key, (*self).length, (*self).state);
+                         (u64) (*self).key, (*self).length, (*self).state);
     if (count < 0 || (bytes) count >= cap) {
         if (outTruncated != nullptr)
             *outTruncated = true;

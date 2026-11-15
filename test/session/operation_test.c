@@ -2,7 +2,7 @@
 
 #include "vex.h"
 #include "support.h"
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     Operation operation = Operation(1, 2, 3, 4, 0);
     assert(!Operation_isValid(nullptr));
     Operation empty = Operation();

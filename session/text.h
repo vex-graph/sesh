@@ -22,7 +22,7 @@ static inline bool SeshText_format(char *dest, bytes cap, bool *outTruncated, co
     }
     va_list args;
     va_start(args, format);
-    int count = vsnprintf(dest, cap, format, args);
+    i32 count = vsnprintf(dest, cap, format, args);
     va_end(args);
     if (count < 0 || (bytes) count >= cap) {
         if (outTruncated != nullptr)

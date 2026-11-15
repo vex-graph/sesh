@@ -76,12 +76,12 @@ bool Operation_equals(const Operation *left, const Operation *right) {
         (*left).resourceId == (*right).resourceId && (*left).expectedRevision == (*right).expectedRevision;
 }
 // Formats client/operation identity as a bounded value summary.
-SESH_VALUE_STRING(Operation, SeshText_format(dest, cap, outTruncated, "operation %llu/%llu", (unsigned long long) (*self).clientId, (unsigned long long) (*self).id))
+SESH_VALUE_STRING(Operation, SeshText_format(dest, cap, outTruncated, "operation %llu/%llu", (u64) (*self).clientId, (u64) (*self).id))
 // Formats all operation fields into a bounded structure summary.
 bool Operation_toStringStruct(const Operation *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Operation{id=%llu,clientId=%llu,workspaceId=%llu,resourceId=%llu,expectedRevision=%llu}",
-                        (unsigned long long) (*self).id, (unsigned long long) (*self).clientId,
-                        (unsigned long long) (*self).workspaceId, (unsigned long long) (*self).resourceId,
-                        (unsigned long long) (*self).expectedRevision);
+                        (u64) (*self).id, (u64) (*self).clientId,
+                        (u64) (*self).workspaceId, (u64) (*self).resourceId,
+                        (u64) (*self).expectedRevision);
 }

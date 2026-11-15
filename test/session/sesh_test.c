@@ -69,7 +69,7 @@ static fn serializedConcurrency(AuthService *auth, Workspace *workspace) {
 }
 
 /* Exercises Sesh composition, valid admission, replay, caller-serialized clients, and optional rejection cases. */
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     ApiAuth credential = { .kind = API_AUTH_BEARER, .credential = "NEVER-PRINT-TOKEN" };
     u64 principal = 7;
     AuthService auth = AuthService(&credential, verify, &principal);

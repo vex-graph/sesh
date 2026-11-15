@@ -24,7 +24,7 @@ typedef struct SeshSnapshot {
     u64 retryDelayMs;
     u32 attempts;
     u32 maxAttempts;
-    int state;
+    i32 state;
 } SeshSnapshot;
 
 /* Cold, externally serialized API. No allocation, clocks, files or sockets.
@@ -42,7 +42,7 @@ bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity);
 bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, any context);
 bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempts);
 bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes length);
-int SeshSnapshot_step(SeshSnapshot *self, u64 nowMs);
+i32 SeshSnapshot_step(SeshSnapshot *self, u64 nowMs);
 /* Quiet bounded teardown: cancel is idempotent and releases provider borrows. */
 fn SeshSnapshot_cancel(SeshSnapshot *self);
 const u8 *SeshSnapshot_getBuffer(const SeshSnapshot *self);
@@ -55,7 +55,7 @@ u64 SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self);
 u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self);
 u32 SeshSnapshot_getAttempts(const SeshSnapshot *self);
 u32 SeshSnapshot_getMaxAttempts(const SeshSnapshot *self);
-int SeshSnapshot_getState(const SeshSnapshot *self);
+i32 SeshSnapshot_getState(const SeshSnapshot *self);
 bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
 bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
 

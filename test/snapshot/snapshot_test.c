@@ -18,13 +18,13 @@ typedef struct Fake {
     u8 bytes[256];
     bytes length;
     u64 key;
-    unsigned calls;
-    unsigned cancels;
-    int result;
+    u32 calls;
+    u32 cancels;
+    i32 result;
 } Fake;
 
 /* Fake provider stores completed snapshots and records cancellation requests. */
-static int put(any context, u64 key, const u8 *data, bytes length, int cancel) {
+static i32 put(any context, u64 key, const u8 *data, bytes length, i32 cancel) {
     Fake *fake = context;
     if (cancel) {
         (*fake).cancels++;
@@ -41,7 +41,7 @@ static int put(any context, u64 key, const u8 *data, bytes length, int cancel) {
 }
 
 /* Copies a stored snapshot into the caller's buffer when its key and capacity are valid. */
-static int get(any context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
+static i32 get(any context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
     Fake *fake = context;
     if (key != (*fake).key || (*fake).length > capacity)
         return HAVEN_SNAPSHOT_REJECT;
@@ -84,7 +84,7 @@ static fn normal(const char *fixture) {
     assert(SeshSnapshot_step(&job, 0) == SESH_SNAPSHOT_QUEUED);
     assert(SeshSnapshot_getAttempts(&job) == 1);
     assert(SeshSnapshot_getNextAttemptMs(&job) == 10);
-    unsigned calls = fake.calls;
+    u32 calls = fake.calls;
     assert(SeshSnapshot_step(&job, 9) == SESH_SNAPSHOT_QUEUED && fake.calls == calls);
     fake.result = HAVEN_SNAPSHOT_DONE;
     assert(SeshSnapshot_step(&job, 10) == SESH_SNAPSHOT_SAVED);
@@ -195,7 +195,7 @@ static fn invalid() {
 }
 
 /* Selects the normal snapshot contract suite or its cold-rejection suite. */
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     assert(argc == 2);
     if (strcmp(argv[1], "invalid") == 0)
         invalid();

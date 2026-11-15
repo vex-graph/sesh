@@ -2,7 +2,7 @@
 
 #include "vex.h"
 #include "support.h"
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     Workspace workspace = Workspace(1, 2);
     assert(Workspace_0().id == 0 && Workspace().id == 0 && Workspace_zero().id == 0);
     assert(Workspace_2(3, 4).principalId == 4);

@@ -61,10 +61,10 @@ SESH_GETTER(Resource, u64, WorkspaceId, workspaceId, 0)
 // Returns the local revision, or zero for null.
 SESH_GETTER(Resource, u64, Revision, revision, 0)
 // Formats resource identity and revision as a bounded value summary.
-SESH_VALUE_STRING(Resource, SeshText_format(dest, cap, outTruncated, "resource %llu revision %llu", (unsigned long long) (*self).id, (unsigned long long) (*self).revision))
+SESH_VALUE_STRING(Resource, SeshText_format(dest, cap, outTruncated, "resource %llu revision %llu", (u64) (*self).id, (u64) (*self).revision))
 // Formats the resource's fields into a bounded structure summary.
 bool Resource_toStringStruct(const Resource *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Resource{id=%llu,workspaceId=%llu,revision=%llu}",
-                        (unsigned long long) (*self).id, (unsigned long long) (*self).workspaceId, (unsigned long long) (*self).revision);
+                        (u64) (*self).id, (u64) (*self).workspaceId, (u64) (*self).revision);
 }

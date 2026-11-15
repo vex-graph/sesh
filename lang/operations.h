@@ -23,13 +23,13 @@ Operations Operations_2(OperationsSlot *items, bytes capacity);
 #define Operations(...) SESH_CONSTRUCT(Operations, __VA_ARGS__)
 #define Operations_zero() Operations_0()
 bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity);
-int Operations_add(Operations *self, const Operation *operation);
+i32 Operations_add(Operations *self, const Operation *operation);
 bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *dest);
 bool Operations_isApplied(const Operations *self, u64 clientId, u64 id);
 /* Applies an already-admitted intent to local revision and records its receipt.
  * No data bytes or remote state are changed. Conflict returns 3 without mutation.
  */
-int Operations_apply(Operations *self, const Operation *operation, Resource *resource);
+i32 Operations_apply(Operations *self, const Operation *operation, Resource *resource);
 bytes Operations_getCount(const Operations *self);
 bytes Operations_getCapacity(const Operations *self);
 fn Operations_clear(Operations *self);

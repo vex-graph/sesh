@@ -3,7 +3,7 @@
 
 #include "vex.h"
 #include "support.h"
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     OperationsSlot first[1], grown[16];
     Operations operations = Operations(first, 1);
     assert(Operations_0().count == 0 && Operations().count == 0 && Operations_zero().count == 0);

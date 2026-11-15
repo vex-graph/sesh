@@ -4,7 +4,7 @@
 #include "graphics/render_loop.h"
 #include "lang/sesh.h"
 #include <assert.h>
-int main() {
+i32 main() {
     Client frameClient = {0};
     SeshClient sessionClient = SeshClient(1);
     assert(frameClient.window == nullptr && SeshClient_getId(&sessionClient) == 1);

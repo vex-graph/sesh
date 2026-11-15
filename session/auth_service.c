@@ -95,11 +95,11 @@ bool AuthService_authenticate(AuthService *self) {
     return true;
 }
 // Formats the admitted principal as a bounded value summary.
-SESH_VALUE_STRING(AuthService, SeshText_format(dest, cap, outTruncated, "principal %llu", (unsigned long long) (*self).principalId))
+SESH_VALUE_STRING(AuthService, SeshText_format(dest, cap, outTruncated, "principal %llu", (u64) (*self).principalId))
 // Formats one-level fields while redacting credential and context contents.
 bool AuthService_toStringStruct(const AuthService *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "AuthService{auth=%s,verifier=%s,context=%s,principalId=%llu}",
                         (*self).auth == nullptr ? "nullptr" : "redacted", (*self).verifier == nullptr ? "nullptr" : "bound",
-                        (*self).context == nullptr ? "nullptr" : "redacted", (unsigned long long) (*self).principalId);
+                        (*self).context == nullptr ? "nullptr" : "redacted", (u64) (*self).principalId);
 }

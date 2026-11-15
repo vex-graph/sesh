@@ -31,9 +31,9 @@ bool SeshClient_setId(SeshClient *self, u64 id) {
 // Returns the installation ID, or zero for a null client.
 SESH_GETTER(SeshClient, u64, Id, id, 0)
 // Formats the installation ID as a bounded value summary.
-SESH_VALUE_STRING(SeshClient, SeshText_format(dest, cap, outTruncated, "client %llu", (unsigned long long) (*self).id))
+SESH_VALUE_STRING(SeshClient, SeshText_format(dest, cap, outTruncated, "client %llu", (u64) (*self).id))
 // Formats the client's field names and values into a bounded buffer.
 bool SeshClient_toStringStruct(const SeshClient *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
-        SeshText_format(dest, cap, outTruncated, "SeshClient{id=%llu}", (unsigned long long) (*self).id);
+        SeshText_format(dest, cap, outTruncated, "SeshClient{id=%llu}", (u64) (*self).id);
 }

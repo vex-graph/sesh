@@ -2,7 +2,7 @@
 
 #include "vex.h"
 #include "support.h"
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     SeshClient client = SeshClient(1);
     assert(SeshClient_getId(&client) == 1);
     assert(SeshClient_getId(nullptr) == 0);

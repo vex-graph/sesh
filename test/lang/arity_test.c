@@ -4,7 +4,7 @@
 #include "vex.h"
 #include "lang/arity.h"
 #include <assert.h>
-int main() {
+i32 main() {
     _Static_assert(SESH_ARITY() == 0);
     _Static_assert(SESH_ARITY(1) == 1);
     _Static_assert(SESH_ARITY(1, 2) == 2);

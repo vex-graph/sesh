@@ -57,7 +57,7 @@ SESH_PART(Resource, Resource, resource)
 SESH_PART(Operations, Operations, operations)
 #undef SESH_PART
 // Validates identity/scope and revision, records intent, then advances one local revision.
-int Sesh_submit(Sesh *self, const Operation *operation) {
+i32 Sesh_submit(Sesh *self, const Operation *operation) {
     if (self == nullptr || !Operation_isValid(operation)) {
         THROW("sesh submit: invalid operation");
         return SESH_REJECTED;
@@ -104,7 +104,7 @@ fn Sesh_close(Sesh *self) {
         *self = Sesh_0();
 }
 // Formats the bound workspace and resource identities as a bounded summary.
-SESH_VALUE_STRING(Sesh, SeshText_format(dest, cap, outTruncated, "sesh workspace %llu resource %llu", (unsigned long long) Workspace_getId((*self).workspace), (unsigned long long) Resource_getId((*self).resource)))
+SESH_VALUE_STRING(Sesh, SeshText_format(dest, cap, outTruncated, "sesh workspace %llu resource %llu", (u64) Workspace_getId((*self).workspace), (u64) Resource_getId((*self).resource)))
 // Formats bounded one-level VALUE projections of the borrowed components.
 bool Sesh_toStringStruct(const Sesh *self, char *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)

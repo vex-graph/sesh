@@ -2,7 +2,7 @@
 
 #include "vex.h"
 #include "support.h"
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     Resource resource = Resource(1, 2, 0);
     assert(Resource_0().id == 0 && Resource().id == 0 && Resource_zero().id == 0);
     assert(Resource_3(3, 4, 5).revision == 5);
