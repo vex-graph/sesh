@@ -17,23 +17,38 @@ typedef struct Worker {
     bool *start;
 } Worker;
 
+;;GETTER
+static inline Sesh *Worker_session(Worker *self) { return &(*self).session; }
+;;GETTER
+static inline pthread_mutex_t *Worker_mutex(const Worker *self) { return (*self).mutex; }
+;;GETTER
+static inline u64 Worker_clientId(const Worker *self) { return (*self).clientId; }
+;;GETTER
+static inline pthread_cond_t *Worker_condition(const Worker *self) { return (*self).condition; }
+;;GETTER
+static inline bytes *Worker_ready(const Worker *self) { return (*self).ready; }
+;;GETTER
+static inline bool *Worker_start(const Worker *self) { return (*self).start; }
+
 /* Applies and immediately replays 32 operations while holding the caller's shared serialization mutex. */
 static any submitWorker(any context) {
     Worker *worker = context;
-    assert(pthread_mutex_lock((*worker).mutex) == 0);
-    ++*(*worker).ready;
-    assert(pthread_cond_broadcast((*worker).condition) == 0);
-    while (!*(*worker).start)
-        assert(pthread_cond_wait((*worker).condition, (*worker).mutex) == 0);
-    assert(pthread_mutex_unlock((*worker).mutex) == 0);
+    pthread_mutex_t *mutex = Worker_mutex(worker);
+    pthread_cond_t *condition = Worker_condition(worker);
+    assert(pthread_mutex_lock(mutex) == 0);
+    ++*Worker_ready(worker);
+    assert(pthread_cond_broadcast(condition) == 0);
+    while (!*Worker_start(worker))
+        assert(pthread_cond_wait(condition, mutex) == 0);
+    assert(pthread_mutex_unlock(mutex) == 0);
     for (u64 id = 1; id <= 32; id++) {
-        assert(pthread_mutex_lock((*worker).mutex) == 0);
-        Sesh *session = &(*worker).session;
+        assert(pthread_mutex_lock(mutex) == 0);
+        Sesh *session = Worker_session(worker);
         Resource *resource = Sesh_getResource(session);
-        Operation operation = Operation(id, (*worker).clientId, 3, 4, Resource_getRevision(resource));
+        Operation operation = Operation(id, Worker_clientId(worker), 3, 4, Resource_getRevision(resource));
         assert(Sesh_submit(session, &operation) == SESH_APPLIED);
         assert(Sesh_submit(session, &operation) == SESH_REPLAY);
-        assert(pthread_mutex_unlock((*worker).mutex) == 0);
+        assert(pthread_mutex_unlock(mutex) == 0);
     }
     return nullptr;
 }

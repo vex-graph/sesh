@@ -22,6 +22,25 @@
  * No private helpers. Count/items controlled through reserve/add/clear, not raw setters.
  */
 ;;INTENTION("per the Conflict Triage Law + Single Class Per File Law (Java Law): reserve/add/clear own backing/count updates; no scalar setter may forge deduplication history")
+;;GETTER
+static inline OperationsSlot *Operations_items(const Operations *self) { return (*self).items; }
+;;SETTER
+static inline fn Operations_setItems(Operations *self, OperationsSlot *items) { (*self).items = items; }
+;;SETTER
+static inline fn Operations_setCount(Operations *self, bytes count) { (*self).count = count; }
+;;SETTER
+static inline fn Operations_setCapacity(Operations *self, bytes capacity) { (*self).capacity = capacity; }
+;;GETTER
+static inline Operation *OperationsSlot_operation(OperationsSlot *self) { return &(*self).operation; }
+;;GETTER
+static inline const Operation *OperationsSlot_operationConst(const OperationsSlot *self) { return &(*self).operation; }
+;;SETTER
+static inline fn OperationsSlot_setOperation(OperationsSlot *self, Operation operation) { (*self).operation = operation; }
+;;GETTER
+static inline bool OperationsSlot_applied(const OperationsSlot *self) { return (*self).applied; }
+;;SETTER
+static inline fn OperationsSlot_setApplied(OperationsSlot *self, bool applied) { (*self).applied = applied; }
+
 // Returns an empty ledger with no borrowed backing storage.
 Operations Operations_0() { return (Operations) {0}; }
 // Binds caller-provided storage as the ledger's initial capacity.
@@ -36,14 +55,14 @@ bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity)
         THROW("operations reserve: invalid storage");
         return false;
     }
-    if (capacity < (*self).capacity) {
+    if (capacity < Operations_getCapacity(self)) {
         THROW("operations reserve: cannot shrink storage");
         return false;
     }
-    if ((*self).count != 0)
-        memmove(items, (*self).items, (*self).count * sizeof(OperationsSlot));
-    (*self).items = items;
-    (*self).capacity = capacity;
+    if (Operations_getCount(self) != 0)
+        memmove(items, Operations_items(self), Operations_getCount(self) * sizeof(OperationsSlot));
+    Operations_setItems(self, items);
+    Operations_setCapacity(self, capacity);
     return true;
 }
 // Finds a client-scoped operation ID and copies it to dest; absence leaves dest unchanged.
@@ -52,9 +71,11 @@ bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *de
         THROW("operations find: invalid input");
         return false;
     }
-    for (bytes i = 0; i < (*self).count; i++) {
-        const OperationsSlot *slot = &(*self).items[i];
-        const Operation *row = &(*slot).operation;
+    bytes count = Operations_getCount(self);
+    OperationsSlot *items = Operations_items(self);
+    for (bytes i = 0; i < count; i++) {
+        const OperationsSlot *slot = &items[i];
+        const Operation *row = OperationsSlot_operationConst(slot);
         if (Operation_getClientId(row) == clientId && Operation_getId(row) == id) {
             *dest = *row;
             return true;
@@ -75,25 +96,28 @@ i32 Operations_add(Operations *self, const Operation *operation) {
         THROW("operations add: identity reused with changed intent");
         return OPERATIONS_REJECTED;
     }
-    if ((*self).count == (*self).capacity) {
+    bytes count = Operations_getCount(self);
+    if (count == Operations_getCapacity(self)) {
         THROW("operations add: reserve larger storage");
         return OPERATIONS_REJECTED;
     }
-    OperationsSlot *slot = &(*self).items[(*self).count];
-    (*slot).operation = *operation;
-    (*slot).applied = false;
-    (*self).count++;
+    OperationsSlot *slot = &Operations_items(self)[count];
+    OperationsSlot_setOperation(slot, *operation);
+    OperationsSlot_setApplied(slot, false);
+    Operations_setCount(self, count + 1);
     return OPERATIONS_ADDED;
 }
 // Reports whether the matching admitted intent has a successful apply receipt.
 bool Operations_isApplied(const Operations *self, u64 clientId, u64 id) {
     if (self == nullptr)
         return false;
-    for (bytes i = 0; i < (*self).count; i++) {
-        const OperationsSlot *slot = &(*self).items[i];
-        const Operation *row = &(*slot).operation;
+    bytes count = Operations_getCount(self);
+    OperationsSlot *items = Operations_items(self);
+    for (bytes i = 0; i < count; i++) {
+        const OperationsSlot *slot = &items[i];
+        const Operation *row = OperationsSlot_operationConst(slot);
         if (Operation_getClientId(row) == clientId && Operation_getId(row) == id)
-            return (*slot).applied;
+            return OperationsSlot_applied(slot);
     }
     return false;
 }
@@ -105,16 +129,18 @@ i32 Operations_apply(Operations *self, const Operation *operation, Resource *res
         THROW("operations apply: invalid scope");
         return OPERATIONS_REJECTED;
     }
-    for (bytes i = 0; i < (*self).count; i++) {
-        OperationsSlot *slot = &(*self).items[i];
-        Operation *row = &(*slot).operation;
+    bytes count = Operations_getCount(self);
+    OperationsSlot *items = Operations_items(self);
+    for (bytes i = 0; i < count; i++) {
+        OperationsSlot *slot = &items[i];
+        Operation *row = OperationsSlot_operation(slot);
         if (Operation_getClientId(row) != Operation_getClientId(operation) || Operation_getId(row) != Operation_getId(operation))
             continue;
         if (!Operation_equals(row, operation)) {
             THROW("operations apply: changed intent");
             return OPERATIONS_REJECTED;
         }
-        if ((*slot).applied)
+        if (OperationsSlot_applied(slot))
             return OPERATIONS_REPLAY;
         u64 revision = Resource_getRevision(resource);
         if (revision != Operation_getExpectedRevision(operation)) {
@@ -126,26 +152,28 @@ i32 Operations_apply(Operations *self, const Operation *operation, Resource *res
             return OPERATIONS_REJECTED;
         }
         Resource_setRevision(resource, revision + UINT64_C(1));
-        (*slot).applied = true;
+        OperationsSlot_setApplied(slot, true);
         return OPERATIONS_ADDED;
     }
     THROW("operations apply: intent not admitted");
     return OPERATIONS_REJECTED;
 }
 // Returns the number of initialized ledger rows, or zero for null.
-SESH_GETTER(Operations, bytes, Count, count, 0)
+;;GETTER
+bytes Operations_getCount(const Operations *self) { return self == nullptr ? 0 : (*self).count; }
 // Returns the current caller-provided row capacity, or zero for null.
-SESH_GETTER(Operations, bytes, Capacity, capacity, 0)
+;;GETTER
+bytes Operations_getCapacity(const Operations *self) { return self == nullptr ? 0 : (*self).capacity; }
 // Forgets all rows without releasing the borrowed storage; caller must exclude users.
 fn Operations_clear(Operations *self) {
     if (self != nullptr)
-        (*self).count = 0;
+        Operations_setCount(self, 0);
 }
 // Formats the current initialized-row count as a bounded value summary.
-SESH_VALUE_STRING(Operations, SeshText_format(dest, cap, outTruncated, "%zu operations", (*self).count))
+SESH_VALUE_STRING(Operations, SeshText_format(dest, cap, outTruncated, "%zu operations", Operations_getCount(self)))
 // Formats the backing pointer and ledger counts into a bounded structure summary.
 bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Operations{items=%p,count=%zu,capacity=%zu}",
-                        (any) (*self).items, (*self).count, (*self).capacity);
+                        (any) Operations_items(self), Operations_getCount(self), Operations_getCapacity(self));
 }

@@ -38,10 +38,4 @@ static inline bool SeshText_format(char *dest, bytes cap, bool *outTruncated, co
             return SeshText_format(dest, cap, outTruncated, "nullptr"); \
         return Expression; \
     }
-#define SESH_GETTER(Class, Type, Name, field, fallback) \
-    Type Class##_get##Name(const Class *self) { \
-        if (self == nullptr) \
-            return fallback; \
-        return (*self).field; \
-    }
 #endif

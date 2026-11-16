@@ -23,30 +23,51 @@ typedef struct Fake {
     i32 result;
 } Fake;
 
+;;GETTER
+static inline u8 *Fake_bytes(Fake *self) { return (*self).bytes; }
+;;GETTER
+static inline bytes Fake_length(const Fake *self) { return (*self).length; }
+;;SETTER
+static inline fn Fake_setLength(Fake *self, bytes length) { (*self).length = length; }
+;;GETTER
+static inline u64 Fake_key(const Fake *self) { return (*self).key; }
+;;SETTER
+static inline fn Fake_setKey(Fake *self, u64 key) { (*self).key = key; }
+;;GETTER
+static inline u32 Fake_calls(const Fake *self) { return (*self).calls; }
+;;SETTER
+static inline fn Fake_setCalls(Fake *self, u32 calls) { (*self).calls = calls; }
+;;GETTER
+static inline u32 Fake_cancels(const Fake *self) { return (*self).cancels; }
+;;SETTER
+static inline fn Fake_setCancels(Fake *self, u32 cancels) { (*self).cancels = cancels; }
+;;GETTER
+static inline i32 Fake_result(const Fake *self) { return (*self).result; }
+
 /* Fake provider stores completed snapshots and records cancellation requests. */
 static i32 put(any context, u64 key, const u8 *data, bytes length, i32 cancel) {
     Fake *fake = context;
     if (cancel) {
-        (*fake).cancels++;
+        Fake_setCancels(fake, Fake_cancels(fake) + 1);
         return HAVEN_SNAPSHOT_REJECT;
     }
-    (*fake).calls++;
-    assert(length <= sizeof((*fake).bytes));
-    if ((*fake).result == HAVEN_SNAPSHOT_DONE) {
-        memcpy((*fake).bytes, data, length);
-        (*fake).length = length;
-        (*fake).key = key;
+    Fake_setCalls(fake, Fake_calls(fake) + 1);
+    assert(length <= sizeof(((Fake) {0}).bytes));
+    if (Fake_result(fake) == HAVEN_SNAPSHOT_DONE) {
+        memcpy(Fake_bytes(fake), data, length);
+        Fake_setLength(fake, length);
+        Fake_setKey(fake, key);
     }
-    return (*fake).result;
+    return Fake_result(fake);
 }
 
 /* Copies a stored snapshot into the caller's buffer when its key and capacity are valid. */
 static i32 get(any context, u64 key, u8 *dest, bytes capacity, bytes *outLength) {
     Fake *fake = context;
-    if (key != (*fake).key || (*fake).length > capacity)
+    if (key != Fake_key(fake) || Fake_length(fake) > capacity)
         return HAVEN_SNAPSHOT_REJECT;
-    memcpy(dest, (*fake).bytes, (*fake).length);
-    *outLength = (*fake).length;
+    memcpy(dest, Fake_bytes(fake), Fake_length(fake));
+    *outLength = Fake_length(fake);
     return HAVEN_SNAPSHOT_DONE;
 }
 

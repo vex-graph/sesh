@@ -32,6 +32,11 @@ AuthService AuthService_3(const ApiAuth *auth, AuthServiceVerifyFn verifier, any
     result.context = context;
     return result;
 }
+;;SETTER
+static inline fn AuthService_setPrincipalId(AuthService *self, u64 principalId) {
+    (*self).principalId = principalId;
+}
+
 // Replaces borrowed credentials and clears any previously admitted principal.
 bool AuthService_setAuth(AuthService *self, const ApiAuth *auth) {
     if (self == nullptr || auth == nullptr) {
@@ -39,7 +44,7 @@ bool AuthService_setAuth(AuthService *self, const ApiAuth *auth) {
         return false;
     }
     (*self).auth = auth;
-    (*self).principalId = 0;
+    AuthService_setPrincipalId(self, 0);
     return true;
 }
 // Replaces the verifier and its borrowed context, revoking the current identity.
@@ -49,9 +54,7 @@ bool AuthService_setVerifier(AuthService *self, AuthServiceVerifyFn verifier, an
         return false;
     }
     (*self).verifier = verifier;
-    (*self).context = context;
-    (*self).principalId = 0;
-    return true;
+    return AuthService_setContext(self, context);
 }
 // Replaces the borrowed verifier context and revokes the current identity.
 bool AuthService_setContext(AuthService *self, any context) {
@@ -60,46 +63,52 @@ bool AuthService_setContext(AuthService *self, any context) {
         return false;
     }
     (*self).context = context;
-    (*self).principalId = 0;
+    AuthService_setPrincipalId(self, 0);
     return true;
 }
 // Returns the borrowed credential descriptor, or nullptr for a null service.
-SESH_GETTER(AuthService, const ApiAuth *, Auth, auth, nullptr)
+;;GETTER
+const ApiAuth *AuthService_getAuth(const AuthService *self) { return self == nullptr ? nullptr : (*self).auth; }
 // Returns the configured verifier callback, or nullptr for a null service.
-SESH_GETTER(AuthService, AuthServiceVerifyFn, Verifier, verifier, nullptr)
+;;GETTER
+AuthServiceVerifyFn AuthService_getVerifier(const AuthService *self) { return self == nullptr ? nullptr : (*self).verifier; }
 // Returns the borrowed verifier context, or nullptr for a null service.
-SESH_GETTER(AuthService, any , Context, context, nullptr)
+;;GETTER
+any AuthService_getContext(const AuthService *self) { return self == nullptr ? nullptr : (*self).context; }
 // Returns the admitted principal ID, or zero for a null service.
-SESH_GETTER(AuthService, u64, PrincipalId, principalId, 0)
+;;GETTER
+u64 AuthService_getPrincipalId(const AuthService *self) { return self == nullptr ? 0 : (*self).principalId; }
 // Reports whether a nonzero principal has been admitted.
 bool AuthService_isAuthenticated(const AuthService *self) { return AuthService_getPrincipalId(self) != 0; }
 // Clears the admitted principal; null input is ignored.
 fn AuthService_revoke(AuthService *self) {
     if (self != nullptr)
-        (*self).principalId = 0;
+        AuthService_setPrincipalId(self, 0);
 }
 // Calls the configured verifier; admits its nonzero principal or revokes on failure.
 bool AuthService_authenticate(AuthService *self) {
-    if (self == nullptr || (*self).auth == nullptr || (*self).verifier == nullptr) {
+    const ApiAuth *auth = AuthService_getAuth(self);
+    AuthServiceVerifyFn verifier = AuthService_getVerifier(self);
+    if (self == nullptr || auth == nullptr || verifier == nullptr) {
         AuthService_revoke(self);
         THROW("auth service authenticate: unconfigured");
         return false;
     }
     u64 principalId = 0;
-    if (!(*self).verifier((*self).auth, (*self).context, &principalId) || principalId == 0) {
+    if (!verifier(auth, AuthService_getContext(self), &principalId) || principalId == 0) {
         AuthService_revoke(self);
         THROW("auth service authenticate: rejected identity");
         return false;
     }
-    (*self).principalId = principalId;
+    AuthService_setPrincipalId(self, principalId);
     return true;
 }
 // Formats the admitted principal as a bounded value summary.
-SESH_VALUE_STRING(AuthService, SeshText_format(dest, cap, outTruncated, "principal %llu", (u64) (*self).principalId))
+SESH_VALUE_STRING(AuthService, SeshText_format(dest, cap, outTruncated, "principal %llu", (u64) AuthService_getPrincipalId(self)))
 // Formats one-level fields while redacting credential and context contents.
 bool AuthService_toStringStruct(const AuthService *self, char *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "AuthService{auth=%s,verifier=%s,context=%s,principalId=%llu}",
-                        (*self).auth == nullptr ? "nullptr" : "redacted", (*self).verifier == nullptr ? "nullptr" : "bound",
-                        (*self).context == nullptr ? "nullptr" : "redacted", (u64) (*self).principalId);
+                        AuthService_getAuth(self) == nullptr ? "nullptr" : "redacted", AuthService_getVerifier(self) == nullptr ? "nullptr" : "bound",
+                        AuthService_getContext(self) == nullptr ? "nullptr" : "redacted", (u64) AuthService_getPrincipalId(self));
 }
