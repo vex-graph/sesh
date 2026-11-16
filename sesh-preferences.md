@@ -2,17 +2,17 @@
 
 ## Constitution Link
 
-gist.md (`../../metadata/gists/preferences/gist.md`) is the compressed law list; all universal laws bind this repository. Read one on demand: `./tools/prefs law "<title>"`. Universal laws are inherited, never restated.
+gist.md (`../../../metadata/gists/preferences/gist.md`) is the compressed law list; all universal laws bind this repository. Read one on demand: `./tools/prefs law "<title>"`. Universal laws are inherited, never restated.
 
-Tier: core (R4 Session Relay). Owns: session objects, local operation admission, snapshot backup jobs. Borrows: RE IO/NIO, Vexspoke CPU contracts, api-haven and hotcwap's one-seam window; implements no graphics of its own.
+Tier: core (Session Relay). Owns: session objects, local operation admission, snapshot backup jobs. Borrows: RE IO/NIO, Vexspoke CPU contracts, api-haven and hotcwap's one-seam window; implements no graphics of its own.
 
 ## Exclusive Laws
 
 | Law Title | Scope | Enforcement |
-| **Single-Transaction Live Coordination Law** | R4 Session Relay | Mandatory for `sesh` |
-| **No-Transaction-Across-Event-Dispatch Law** | R4 Session Relay | Mandatory for `sesh` |
-| **Snapshot Backup Boundary Law** | R4 explicit backup scheduling | Mandatory for `sesh` |
-| **Session Composition and Identity Law** | R4 session objects | Mandatory for `sesh` |
+| **Single-Transaction Live Coordination Law** | core Session Relay | Mandatory for `sesh` |
+| **No-Transaction-Across-Event-Dispatch Law** | core Session Relay | Mandatory for `sesh` |
+| **Snapshot Backup Boundary Law** | core explicit backup scheduling | Mandatory for `sesh` |
+| **Session Composition and Identity Law** | core session objects | Mandatory for `sesh` |
 
 ### Single-Transaction Live Coordination Law
 
