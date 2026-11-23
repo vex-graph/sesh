@@ -56,7 +56,7 @@ u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self);
 u32 SeshSnapshot_getAttempts(const SeshSnapshot *self);
 u32 SeshSnapshot_getMaxAttempts(const SeshSnapshot *self);
 i32 SeshSnapshot_getState(const SeshSnapshot *self);
-bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
-bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated);
+bool SeshSnapshot_toString(const SeshSnapshot *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, utf8 *dest, bytes cap, bool *outTruncated);
 
 #endif

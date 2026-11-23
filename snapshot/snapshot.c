@@ -34,7 +34,10 @@
 ;;INTENTION("per the Single Class Per File Law (Java Law) + Conflict Triage Law: configuration has validated setters; job-derived fields mutate only through queue/step/cancel so callers cannot forge acknowledgement or break provider borrows")
 
 ;;GETTER
-static inline u8 *SeshSnapshot_bufferMut(SeshSnapshot *self) { return (*self).buffer; }
+static inline u8 *SeshSnapshot_bufferMut(SeshSnapshot *self)
+{
+    return (*self).buffer;
+}
 ;;SETTER
 static inline fn SeshSnapshot_setBufferFields(SeshSnapshot *self, u8 *buffer, bytes capacity, bytes length) {
     (*self).buffer = buffer;
@@ -52,17 +55,32 @@ static inline fn SeshSnapshot_setRetryFields(SeshSnapshot *self, u64 delayMs, u3
     (*self).maxAttempts = maxAttempts;
 }
 ;;SETTER
-static inline fn SeshSnapshot_setLength(SeshSnapshot *self, bytes length) { (*self).length = length; }
+static inline fn SeshSnapshot_setLength(SeshSnapshot *self, bytes length)
+{
+    (*self).length = length;
+}
 ;;SETTER
-static inline fn SeshSnapshot_setKey(SeshSnapshot *self, u64 key) { (*self).key = key; }
+static inline fn SeshSnapshot_setKey(SeshSnapshot *self, u64 key)
+{
+    (*self).key = key;
+}
 ;;SETTER
-static inline fn SeshSnapshot_setAttempts(SeshSnapshot *self, u32 attempts) { (*self).attempts = attempts; }
+static inline fn SeshSnapshot_setAttempts(SeshSnapshot *self, u32 attempts)
+{
+    (*self).attempts = attempts;
+}
 ;;SETTER
-static inline fn SeshSnapshot_setNextAttemptMs(SeshSnapshot *self, u64 nextAttemptMs) { (*self).nextAttemptMs = nextAttemptMs; }
+static inline fn SeshSnapshot_setNextAttemptMs(SeshSnapshot *self, u64 nextAttemptMs)
+{
+    (*self).nextAttemptMs = nextAttemptMs;
+}
 ;;SETTER
-static inline fn SeshSnapshot_setState(SeshSnapshot *self, i32 state) { (*self).state = state; }
+static inline fn SeshSnapshot_setState(SeshSnapshot *self, i32 state)
+{
+    (*self).state = state;
+}
 
-// Allows configuration changes only when a job is not queued.
+/** Allows configuration changes only when a job is not queued. */
 static bool configurable(SeshSnapshot *self) {
     if (self == nullptr || SeshSnapshot_getState(self) == SESH_SNAPSHOT_QUEUED) {
         THROW("snapshot configuration: null or active job");
@@ -71,13 +89,13 @@ static bool configurable(SeshSnapshot *self) {
     return true;
 }
 
-// Returns an idle job with the documented default retry delay and attempt limit.
+/** Returns an idle job with the documented default retry delay and attempt limit. */
 SeshSnapshot SeshSnapshot_0() {
     return (SeshSnapshot) { .retryDelayMs = SESH_SNAPSHOT_RETRY_DELAY_DEFAULT,
                            .maxAttempts = SESH_SNAPSHOT_MAX_ATTEMPTS_DEFAULT };
 }
 
-// Sets borrowed staging storage while idle and clears the queued byte length.
+/** Sets borrowed staging storage while idle and clears the queued byte length. */
 bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity) {
     if (!configurable(self))
         return false;
@@ -89,7 +107,7 @@ bool SeshSnapshot_setBuffer(SeshSnapshot *self, u8 *buffer, bytes capacity) {
     return true;
 }
 
-// Sets the provider callback and borrowed context while idle.
+/** Sets the provider callback and borrowed context while idle. */
 bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, any context) {
     if (!configurable(self))
         return false;
@@ -101,7 +119,7 @@ bool SeshSnapshot_setProvider(SeshSnapshot *self, HavenSnapshotPutFn put, any co
     return true;
 }
 
-// Sets nonzero retry delay and attempt limit while idle.
+/** Sets nonzero retry delay and attempt limit while idle. */
 bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempts) {
     if (!configurable(self))
         return false;
@@ -113,7 +131,7 @@ bool SeshSnapshot_setRetryPolicy(SeshSnapshot *self, u64 delayMs, u32 maxAttempt
     return true;
 }
 
-// Copies bytes into staging storage and admits one keyed job if configured and idle.
+/** Copies bytes into staging storage and admits one keyed job if configured and idle. */
 bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes length) {
     if (self == nullptr || key == 0 || (data == nullptr && length != 0)) {
         THROW("snapshot queue: invalid input");
@@ -134,7 +152,7 @@ bool SeshSnapshot_queue(SeshSnapshot *self, u64 key, const u8 *data, bytes lengt
     return true;
 }
 
-// Advances an eligible job once using caller time and the provider's result.
+/** Advances an eligible job once using caller time and the provider's result. */
 i32 SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
     if (self == nullptr) {
         THROW("snapshot step: null job");
@@ -164,7 +182,7 @@ i32 SeshSnapshot_step(SeshSnapshot *self, u64 nowMs) {
     return SeshSnapshot_getState(self);
 }
 
-// Cancels a queued job through the provider; null and inactive jobs are ignored.
+/** Cancels a queued job through the provider; null and inactive jobs are ignored. */
 fn SeshSnapshot_cancel(SeshSnapshot *self) {
     if (self == nullptr || SeshSnapshot_getState(self) != SESH_SNAPSHOT_QUEUED)
         return;
@@ -173,42 +191,75 @@ fn SeshSnapshot_cancel(SeshSnapshot *self) {
     SeshSnapshot_setState(self, SESH_SNAPSHOT_CANCELLED);
 }
 
-// Returns the borrowed staging buffer, or nullptr for null self.
+/** Returns the borrowed staging buffer, or nullptr for null self. */
 ;;GETTER
-const u8 *SeshSnapshot_getBuffer(const SeshSnapshot *self) { return self == nullptr ? nullptr : (*self).buffer; }
-// Returns the staging buffer capacity, or zero for null self.
+const u8 *SeshSnapshot_getBuffer(const SeshSnapshot *self)
+{
+    return self == nullptr ? nullptr : (*self).buffer;
+}
+/** Returns the staging buffer capacity, or zero for null self. */
 ;;GETTER
-bytes SeshSnapshot_getCapacity(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).capacity; }
-// Returns the queued byte length, or zero for null self.
+bytes SeshSnapshot_getCapacity(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).capacity;
+}
+/** Returns the queued byte length, or zero for null self. */
 ;;GETTER
-bytes SeshSnapshot_getLength(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).length; }
-// Returns the provider callback, or nullptr for null self.
+bytes SeshSnapshot_getLength(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).length;
+}
+/** Returns the provider callback, or nullptr for null self. */
 ;;GETTER
-HavenSnapshotPutFn SeshSnapshot_getProvider(const SeshSnapshot *self) { return self == nullptr ? nullptr : (*self).put; }
-// Returns the borrowed provider context, or nullptr for null self.
+HavenSnapshotPutFn SeshSnapshot_getProvider(const SeshSnapshot *self)
+{
+    return self == nullptr ? nullptr : (*self).put;
+}
+/** Returns the borrowed provider context, or nullptr for null self. */
 ;;GETTER
-any SeshSnapshot_getContext(const SeshSnapshot *self) { return self == nullptr ? nullptr : (*self).context; }
-// Returns the snapshot key, or zero for null self.
+any SeshSnapshot_getContext(const SeshSnapshot *self)
+{
+    return self == nullptr ? nullptr : (*self).context;
+}
+/** Returns the snapshot key, or zero for null self. */
 ;;GETTER
-u64 SeshSnapshot_getKey(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).key; }
-// Returns the next eligible retry time, or zero for null self.
+u64 SeshSnapshot_getKey(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).key;
+}
+/** Returns the next eligible retry time, or zero for null self. */
 ;;GETTER
-u64 SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).nextAttemptMs; }
-// Returns the configured retry delay, or zero for null self.
+u64 SeshSnapshot_getNextAttemptMs(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).nextAttemptMs;
+}
+/** Returns the configured retry delay, or zero for null self. */
 ;;GETTER
-u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).retryDelayMs; }
-// Returns the number of retry outcomes seen, or zero for null self.
+u64 SeshSnapshot_getRetryDelayMs(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).retryDelayMs;
+}
+/** Returns the number of retry outcomes seen, or zero for null self. */
 ;;GETTER
-u32 SeshSnapshot_getAttempts(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).attempts; }
-// Returns the retry attempt limit, or zero for null self.
+u32 SeshSnapshot_getAttempts(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).attempts;
+}
+/** Returns the retry attempt limit, or zero for null self. */
 ;;GETTER
-u32 SeshSnapshot_getMaxAttempts(const SeshSnapshot *self) { return self == nullptr ? 0 : (*self).maxAttempts; }
-// Returns the current job state, or IDLE for null self.
+u32 SeshSnapshot_getMaxAttempts(const SeshSnapshot *self)
+{
+    return self == nullptr ? 0 : (*self).maxAttempts;
+}
+/** Returns the current job state, or IDLE for null self. */
 ;;GETTER
-i32 SeshSnapshot_getState(const SeshSnapshot *self) { return self == nullptr ? SESH_SNAPSHOT_IDLE : (*self).state; }
+i32 SeshSnapshot_getState(const SeshSnapshot *self)
+{
+    return self == nullptr ? SESH_SNAPSHOT_IDLE : (*self).state;
+}
 
-// Writes either the value summary or one-level field dump into a bounded buffer.
-static bool stringify(const SeshSnapshot *self, bool structure, char *dest, bytes cap, bool *outTruncated) {
+/** Writes either the value summary or one-level field dump into a bounded buffer. */
+static bool stringify(const SeshSnapshot *self, bool structure, utf8 *dest, bytes cap, bool *outTruncated) {
     if (outTruncated != nullptr)
         *outTruncated = false;
     if (dest == nullptr || cap == 0) {
@@ -239,12 +290,12 @@ static bool stringify(const SeshSnapshot *self, bool structure, char *dest, byte
     return true;
 }
 
-// Formats the job's key, byte count, and state into a bounded value summary.
-bool SeshSnapshot_toString(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats the job's key, byte count, and state into a bounded value summary. */
+bool SeshSnapshot_toString(const SeshSnapshot *self, utf8 *dest, bytes cap, bool *outTruncated) {
     return stringify(self, false, dest, cap, outTruncated);
 }
 
-// Formats all snapshot fields into a bounded one-level structure summary.
-bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats all snapshot fields into a bounded one-level structure summary. */
+bool SeshSnapshot_toStringStruct(const SeshSnapshot *self, utf8 *dest, bytes cap, bool *outTruncated) {
     return stringify(self, true, dest, cap, outTruncated);
 }
