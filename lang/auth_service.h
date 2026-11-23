@@ -32,6 +32,6 @@ u64 AuthService_getPrincipalId(const AuthService *self);
 bool AuthService_isAuthenticated(const AuthService *self);
 bool AuthService_authenticate(AuthService *self);
 fn AuthService_revoke(AuthService *self);
-bool AuthService_toString(const AuthService *self, char *dest, bytes cap, bool *outTruncated);
-bool AuthService_toStringStruct(const AuthService *self, char *dest, bytes cap, bool *outTruncated);
+bool AuthService_toString(const AuthService *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool AuthService_toStringStruct(const AuthService *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif

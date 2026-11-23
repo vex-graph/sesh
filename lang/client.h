@@ -14,6 +14,6 @@ SeshClient SeshClient_1(u64 id);
 #define SeshClient_zero() SeshClient_0()
 bool SeshClient_setId(SeshClient *self, u64 id);
 u64 SeshClient_getId(const SeshClient *self);
-bool SeshClient_toString(const SeshClient *self, char *dest, bytes cap, bool *outTruncated);
-bool SeshClient_toStringStruct(const SeshClient *self, char *dest, bytes cap, bool *outTruncated);
+bool SeshClient_toString(const SeshClient *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool SeshClient_toStringStruct(const SeshClient *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif

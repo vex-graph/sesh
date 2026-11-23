@@ -33,6 +33,6 @@ i32 Operations_apply(Operations *self, const Operation *operation, Resource *res
 bytes Operations_getCount(const Operations *self);
 bytes Operations_getCapacity(const Operations *self);
 fn Operations_clear(Operations *self);
-bool Operations_toString(const Operations *self, char *dest, bytes cap, bool *outTruncated);
-bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated);
+bool Operations_toString(const Operations *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool Operations_toStringStruct(const Operations *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif

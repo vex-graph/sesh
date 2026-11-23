@@ -15,6 +15,6 @@ bool Workspace_setId(Workspace *self, u64 id);
 bool Workspace_setPrincipalId(Workspace *self, u64 principalId);
 u64 Workspace_getId(const Workspace *self);
 u64 Workspace_getPrincipalId(const Workspace *self);
-bool Workspace_toString(const Workspace *self, char *dest, bytes cap, bool *outTruncated);
-bool Workspace_toStringStruct(const Workspace *self, char *dest, bytes cap, bool *outTruncated);
+bool Workspace_toString(const Workspace *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool Workspace_toStringStruct(const Workspace *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif

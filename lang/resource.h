@@ -18,6 +18,6 @@ bool Resource_setRevision(Resource *self, u64 revision);
 u64 Resource_getId(const Resource *self);
 u64 Resource_getWorkspaceId(const Resource *self);
 u64 Resource_getRevision(const Resource *self);
-bool Resource_toString(const Resource *self, char *dest, bytes cap, bool *outTruncated);
-bool Resource_toStringStruct(const Resource *self, char *dest, bytes cap, bool *outTruncated);
+bool Resource_toString(const Resource *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool Resource_toStringStruct(const Resource *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif

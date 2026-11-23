@@ -30,6 +30,6 @@ u64 Operation_getResourceId(const Operation *self);
 u64 Operation_getExpectedRevision(const Operation *self);
 bool Operation_isValid(const Operation *self);
 bool Operation_equals(const Operation *left, const Operation *right);
-bool Operation_toString(const Operation *self, char *dest, bytes cap, bool *outTruncated);
-bool Operation_toStringStruct(const Operation *self, char *dest, bytes cap, bool *outTruncated);
+bool Operation_toString(const Operation *self, utf8 *dest, bytes cap, bool *outTruncated);
+bool Operation_toStringStruct(const Operation *self, utf8 *dest, bytes cap, bool *outTruncated);
 #endif
