@@ -20,9 +20,12 @@
  * toString/toStringStruct (child VALUE projections, never credential dumps).
  * No private helpers. Every shared component requires external serialization.
  */
-// Returns an unbound session composition.
-Sesh Sesh_0() { return (Sesh) {0}; }
-// Binds all borrowed components; rejects any missing component.
+/** Returns an unbound session composition. */
+Sesh Sesh_0()
+{
+    return (Sesh) {0};
+}
+/** Binds all borrowed components; rejects any missing component. */
 Sesh Sesh_5(AuthService *authService, SeshClient *client, Workspace *workspace, Resource *resource, Operations *operations) {
     if (authService == nullptr || client == nullptr || workspace == nullptr || resource == nullptr || operations == nullptr) {
         THROW("sesh binding: missing component");
@@ -30,47 +33,62 @@ Sesh Sesh_5(AuthService *authService, SeshClient *client, Workspace *workspace, 
     }
     return (Sesh) {authService, client, workspace, resource, operations};
 }
-// Binds and retrieves the borrowed authentication service.
+/** Binds and retrieves the borrowed authentication service. */
 ;;SETTER
 bool Sesh_setAuthService(Sesh *self, AuthService *value) {
     if (self == nullptr || value == nullptr) { THROW("sesh binding: null component"); return false; }
     (*self).authService = value; return true;
 }
 ;;GETTER
-AuthService *Sesh_getAuthService(const Sesh *self) { return self == nullptr ? nullptr : (*self).authService; }
-// Binds and retrieves the borrowed installation identity.
+AuthService *Sesh_getAuthService(const Sesh *self)
+{
+    return self == nullptr ? nullptr : (*self).authService;
+}
+/** Binds and retrieves the borrowed installation identity. */
 ;;SETTER
 bool Sesh_setClient(Sesh *self, SeshClient *value) {
     if (self == nullptr || value == nullptr) { THROW("sesh binding: null component"); return false; }
     (*self).client = value; return true;
 }
 ;;GETTER
-SeshClient *Sesh_getClient(const Sesh *self) { return self == nullptr ? nullptr : (*self).client; }
-// Binds and retrieves the borrowed workspace namespace.
+SeshClient *Sesh_getClient(const Sesh *self)
+{
+    return self == nullptr ? nullptr : (*self).client;
+}
+/** Binds and retrieves the borrowed workspace namespace. */
 ;;SETTER
 bool Sesh_setWorkspace(Sesh *self, Workspace *value) {
     if (self == nullptr || value == nullptr) { THROW("sesh binding: null component"); return false; }
     (*self).workspace = value; return true;
 }
 ;;GETTER
-Workspace *Sesh_getWorkspace(const Sesh *self) { return self == nullptr ? nullptr : (*self).workspace; }
-// Binds and retrieves the borrowed resource/revision record.
+Workspace *Sesh_getWorkspace(const Sesh *self)
+{
+    return self == nullptr ? nullptr : (*self).workspace;
+}
+/** Binds and retrieves the borrowed resource/revision record. */
 ;;SETTER
 bool Sesh_setResource(Sesh *self, Resource *value) {
     if (self == nullptr || value == nullptr) { THROW("sesh binding: null component"); return false; }
     (*self).resource = value; return true;
 }
 ;;GETTER
-Resource *Sesh_getResource(const Sesh *self) { return self == nullptr ? nullptr : (*self).resource; }
-// Binds and retrieves the borrowed operation-history ledger.
+Resource *Sesh_getResource(const Sesh *self)
+{
+    return self == nullptr ? nullptr : (*self).resource;
+}
+/** Binds and retrieves the borrowed operation-history ledger. */
 ;;SETTER
 bool Sesh_setOperations(Sesh *self, Operations *value) {
     if (self == nullptr || value == nullptr) { THROW("sesh binding: null component"); return false; }
     (*self).operations = value; return true;
 }
 ;;GETTER
-Operations *Sesh_getOperations(const Sesh *self) { return self == nullptr ? nullptr : (*self).operations; }
-// Validates identity/scope and revision, records intent, then advances one local revision.
+Operations *Sesh_getOperations(const Sesh *self)
+{
+    return self == nullptr ? nullptr : (*self).operations;
+}
+/** Validates identity/scope and revision, records intent, then advances one local revision. */
 i32 Sesh_submit(Sesh *self, const Operation *operation) {
     if (self == nullptr || !Operation_isValid(operation)) {
         THROW("sesh submit: invalid operation");
@@ -112,19 +130,18 @@ i32 Sesh_submit(Sesh *self, const Operation *operation) {
         return SESH_REJECTED;
     return Operations_apply(operations, operation, resource) == OPERATIONS_ADDED ? SESH_APPLIED : SESH_REJECTED;
 }
-// Detaches all borrowed components without destroying or mutating them.
+/** Detaches all borrowed components without destroying or mutating them. */
 fn Sesh_close(Sesh *self) {
     if (self != nullptr)
         *self = Sesh_0();
 }
-// Formats the bound workspace and resource identities as a bounded summary.
+/** Formats the bound workspace and resource identities as a bounded summary. */
 SESH_VALUE_STRING(Sesh, SeshText_format(dest, cap, outTruncated, "sesh workspace %llu resource %llu", (u64) Workspace_getId(Sesh_getWorkspace(self)), (u64) Resource_getId(Sesh_getResource(self))))
-// Formats bounded one-level VALUE projections of the borrowed components.
-bool Sesh_toStringStruct(const Sesh *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats bounded one-level VALUE projections of the borrowed components. */
+bool Sesh_toStringStruct(const Sesh *self, utf8 *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)
         return SeshText_format(dest, cap, outTruncated, "nullptr");
-    /* Safety bound: these child VALUE formats contain only bounded numeric IDs. */
-    char auth[96], client[96], workspace[96], resource[96], operations[96];
+    utf8 auth[96], client[96], workspace[96], resource[96], operations[96];
     if (!AuthService_toString(Sesh_getAuthService(self), auth, sizeof(auth), nullptr) ||
         !SeshClient_toString(Sesh_getClient(self), client, sizeof(client), nullptr) ||
         !Workspace_toString(Sesh_getWorkspace(self), workspace, sizeof(workspace), nullptr) ||

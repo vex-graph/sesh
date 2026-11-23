@@ -23,33 +23,63 @@
  */
 ;;INTENTION("per the Conflict Triage Law + Single Class Per File Law (Java Law): reserve/add/clear own backing/count updates; no scalar setter may forge deduplication history")
 ;;GETTER
-static inline OperationsSlot *Operations_items(const Operations *self) { return (*self).items; }
+static inline OperationsSlot *Operations_items(const Operations *self)
+{
+    return (*self).items;
+}
 ;;SETTER
-static inline fn Operations_setItems(Operations *self, OperationsSlot *items) { (*self).items = items; }
+static inline fn Operations_setItems(Operations *self, OperationsSlot *items)
+{
+    (*self).items = items;
+}
 ;;SETTER
-static inline fn Operations_setCount(Operations *self, bytes count) { (*self).count = count; }
+static inline fn Operations_setCount(Operations *self, bytes count)
+{
+    (*self).count = count;
+}
 ;;SETTER
-static inline fn Operations_setCapacity(Operations *self, bytes capacity) { (*self).capacity = capacity; }
+static inline fn Operations_setCapacity(Operations *self, bytes capacity)
+{
+    (*self).capacity = capacity;
+}
 ;;GETTER
-static inline Operation *OperationsSlot_operation(OperationsSlot *self) { return &(*self).operation; }
+static inline Operation *OperationsSlot_operation(OperationsSlot *self)
+{
+    return &(*self).operation;
+}
 ;;GETTER
-static inline const Operation *OperationsSlot_operationConst(const OperationsSlot *self) { return &(*self).operation; }
+static inline const Operation *OperationsSlot_operationConst(const OperationsSlot *self)
+{
+    return &(*self).operation;
+}
 ;;SETTER
-static inline fn OperationsSlot_setOperation(OperationsSlot *self, Operation operation) { (*self).operation = operation; }
+static inline fn OperationsSlot_setOperation(OperationsSlot *self, Operation operation)
+{
+    (*self).operation = operation;
+}
 ;;GETTER
-static inline bool OperationsSlot_applied(const OperationsSlot *self) { return (*self).applied; }
+static inline bool OperationsSlot_applied(const OperationsSlot *self)
+{
+    return (*self).applied;
+}
 ;;SETTER
-static inline fn OperationsSlot_setApplied(OperationsSlot *self, bool applied) { (*self).applied = applied; }
+static inline fn OperationsSlot_setApplied(OperationsSlot *self, bool applied)
+{
+    (*self).applied = applied;
+}
 
-// Returns an empty ledger with no borrowed backing storage.
-Operations Operations_0() { return (Operations) {0}; }
-// Binds caller-provided storage as the ledger's initial capacity.
+/** Returns an empty ledger with no borrowed backing storage. */
+Operations Operations_0()
+{
+    return (Operations) {0};
+}
+/** Binds caller-provided storage as the ledger's initial capacity. */
 Operations Operations_2(OperationsSlot *items, bytes capacity) {
     Operations result = Operations_0();
     Operations_reserve(&result, items, capacity);
     return result;
 }
-// Rebinds to equal-or-larger caller storage, preserving all admitted rows.
+/** Rebinds to equal-or-larger caller storage, preserving all admitted rows. */
 bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity) {
     if (self == nullptr || items == nullptr || capacity == 0 || capacity > SIZE_MAX / sizeof(OperationsSlot)) {
         THROW("operations reserve: invalid storage");
@@ -65,7 +95,7 @@ bool Operations_reserve(Operations *self, OperationsSlot *items, bytes capacity)
     Operations_setCapacity(self, capacity);
     return true;
 }
-// Finds a client-scoped operation ID and copies it to dest; absence leaves dest unchanged.
+/** Finds a client-scoped operation ID and copies it to dest; absence leaves dest unchanged. */
 bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *dest) {
     if (self == nullptr || dest == nullptr || clientId == 0 || id == 0) {
         THROW("operations find: invalid input");
@@ -83,7 +113,7 @@ bool Operations_find(const Operations *self, u64 clientId, u64 id, Operation *de
     }
     return false;
 }
-// Copies new intent, reports identical replay, and rejects changed or full admissions.
+/** Copies new intent, reports identical replay, and rejects changed or full admissions. */
 i32 Operations_add(Operations *self, const Operation *operation) {
     if (self == nullptr || !Operation_isValid(operation)) {
         THROW("operations add: invalid operation");
@@ -107,7 +137,7 @@ i32 Operations_add(Operations *self, const Operation *operation) {
     Operations_setCount(self, count + 1);
     return OPERATIONS_ADDED;
 }
-// Reports whether the matching admitted intent has a successful apply receipt.
+/** Reports whether the matching admitted intent has a successful apply receipt. */
 bool Operations_isApplied(const Operations *self, u64 clientId, u64 id) {
     if (self == nullptr)
         return false;
@@ -121,7 +151,7 @@ bool Operations_isApplied(const Operations *self, u64 clientId, u64 id) {
     }
     return false;
 }
-// Applies admitted intent once when scope and expected revision match the resource.
+/** Applies admitted intent once when scope and expected revision match the resource. */
 i32 Operations_apply(Operations *self, const Operation *operation, Resource *resource) {
     if (self == nullptr || !Operation_isValid(operation) || resource == nullptr ||
         Operation_getResourceId(operation) != Resource_getId(resource) ||
@@ -158,21 +188,27 @@ i32 Operations_apply(Operations *self, const Operation *operation, Resource *res
     THROW("operations apply: intent not admitted");
     return OPERATIONS_REJECTED;
 }
-// Returns the number of initialized ledger rows, or zero for null.
+/** Returns the number of initialized ledger rows, or zero for null. */
 ;;GETTER
-bytes Operations_getCount(const Operations *self) { return self == nullptr ? 0 : (*self).count; }
-// Returns the current caller-provided row capacity, or zero for null.
+bytes Operations_getCount(const Operations *self)
+{
+    return self == nullptr ? 0 : (*self).count;
+}
+/** Returns the current caller-provided row capacity, or zero for null. */
 ;;GETTER
-bytes Operations_getCapacity(const Operations *self) { return self == nullptr ? 0 : (*self).capacity; }
-// Forgets all rows without releasing the borrowed storage; caller must exclude users.
+bytes Operations_getCapacity(const Operations *self)
+{
+    return self == nullptr ? 0 : (*self).capacity;
+}
+/** Forgets all rows without releasing the borrowed storage; caller must exclude users. */
 fn Operations_clear(Operations *self) {
     if (self != nullptr)
         Operations_setCount(self, 0);
 }
-// Formats the current initialized-row count as a bounded value summary.
+/** Formats the current initialized-row count as a bounded value summary. */
 SESH_VALUE_STRING(Operations, SeshText_format(dest, cap, outTruncated, "%zu operations", Operations_getCount(self)))
-// Formats the backing pointer and ledger counts into a bounded structure summary.
-bool Operations_toStringStruct(const Operations *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats the backing pointer and ledger counts into a bounded structure summary. */
+bool Operations_toStringStruct(const Operations *self, utf8 *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Operations{items=%p,count=%zu,capacity=%zu}",
                         (any) Operations_items(self), Operations_getCount(self), Operations_getCapacity(self));

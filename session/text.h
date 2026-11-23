@@ -7,7 +7,7 @@
 /* Internal cold formatter: callers supply only metadata, never credentials.
  * Error leaves a terminated prefix when capacity is nonzero. No heap ownership.
  */
-static inline bool SeshText_format(char *dest, bytes cap, bool *outTruncated, const char *format, ...) {
+static inline bool SeshText_format(utf8 *dest, bytes cap, bool *outTruncated, string format, ...) {
     if (outTruncated != nullptr)
         *outTruncated = false;
     if (dest == nullptr || cap == 0) {
@@ -33,7 +33,7 @@ static inline bool SeshText_format(char *dest, bytes cap, bool *outTruncated, co
     return true;
 }
 #define SESH_VALUE_STRING(Class, Expression) \
-    bool Class##_toString(const Class *self, char *dest, bytes cap, bool *outTruncated) { \
+    bool Class##_toString(const Class *self, utf8 *dest, bytes cap, bool *outTruncated) { \
         if (self == nullptr) \
             return SeshText_format(dest, cap, outTruncated, "nullptr"); \
         return Expression; \

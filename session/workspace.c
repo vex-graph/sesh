@@ -12,9 +12,12 @@
  * getId/getPrincipalId (null=0); toString/toStringStruct. No private helpers.
  * Mutations require external serialization with all Sesh borrowers.
  */
-// Returns an empty workspace with no identity or admitted principal.
-Workspace Workspace_0() { return (Workspace) {0}; }
-// Constructs a workspace for a nonzero identity and principal.
+/** Returns an empty workspace with no identity or admitted principal. */
+Workspace Workspace_0()
+{
+    return (Workspace) {0};
+}
+/** Constructs a workspace for a nonzero identity and principal. */
 Workspace Workspace_2(u64 id, u64 principalId) {
     Workspace result = Workspace_0();
     if (id == 0 || principalId == 0) {
@@ -25,7 +28,7 @@ Workspace Workspace_2(u64 id, u64 principalId) {
     result.principalId = principalId;
     return result;
 }
-// Sets a nonzero workspace ID; invalid input preserves the previous value.
+/** Sets a nonzero workspace ID; invalid input preserves the previous value. */
 bool Workspace_setId(Workspace *self, u64 id) {
     if (self == nullptr || id == 0) {
         THROW("workspace identity: null or zero ID");
@@ -34,7 +37,7 @@ bool Workspace_setId(Workspace *self, u64 id) {
     (*self).id = id;
     return true;
 }
-// Sets a nonzero principal ID; invalid input preserves the previous value.
+/** Sets a nonzero principal ID; invalid input preserves the previous value. */
 bool Workspace_setPrincipalId(Workspace *self, u64 principalId) {
     if (self == nullptr || principalId == 0) {
         THROW("workspace principal: null or zero ID");
@@ -43,16 +46,22 @@ bool Workspace_setPrincipalId(Workspace *self, u64 principalId) {
     (*self).principalId = principalId;
     return true;
 }
-// Returns the workspace ID, or zero for null.
+/** Returns the workspace ID, or zero for null. */
 ;;GETTER
-u64 Workspace_getId(const Workspace *self) { return self == nullptr ? 0 : (*self).id; }
-// Returns the owning principal ID, or zero for null.
+u64 Workspace_getId(const Workspace *self)
+{
+    return self == nullptr ? 0 : (*self).id;
+}
+/** Returns the owning principal ID, or zero for null. */
 ;;GETTER
-u64 Workspace_getPrincipalId(const Workspace *self) { return self == nullptr ? 0 : (*self).principalId; }
-// Formats the workspace ID as a bounded value summary.
+u64 Workspace_getPrincipalId(const Workspace *self)
+{
+    return self == nullptr ? 0 : (*self).principalId;
+}
+/** Formats the workspace ID as a bounded value summary. */
 SESH_VALUE_STRING(Workspace, SeshText_format(dest, cap, outTruncated, "workspace %llu", (u64) Workspace_getId(self)))
-// Formats both identity fields into a bounded structure summary.
-bool Workspace_toStringStruct(const Workspace *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats both identity fields into a bounded structure summary. */
+bool Workspace_toStringStruct(const Workspace *self, utf8 *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "Workspace{id=%llu,principalId=%llu}",
                         (u64) Workspace_getId(self), (u64) Workspace_getPrincipalId(self));

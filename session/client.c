@@ -11,15 +11,18 @@
  * PUBLIC: _0/_1/chooser/zero, setId (reject zero preserving state), getId (null=0),
  * toString/toStringStruct. No private helpers. Externally serialized.
  */
-// Returns the empty client value, whose installation ID is zero.
-SeshClient SeshClient_0() { return (SeshClient) {0}; }
-// Constructs a client with the supplied nonzero installation ID.
+/** Returns the empty client value, whose installation ID is zero. */
+SeshClient SeshClient_0()
+{
+    return (SeshClient) {0};
+}
+/** Constructs a client with the supplied nonzero installation ID. */
 SeshClient SeshClient_1(u64 id) {
     SeshClient result = SeshClient_0();
     SeshClient_setId(&result, id);
     return result;
 }
-// Sets a nonzero installation ID; rejects invalid input without changing state.
+/** Sets a nonzero installation ID; rejects invalid input without changing state. */
 bool SeshClient_setId(SeshClient *self, u64 id) {
     if (self == nullptr || id == 0) {
         THROW("client identity: null or zero ID");
@@ -28,13 +31,16 @@ bool SeshClient_setId(SeshClient *self, u64 id) {
     (*self).id = id;
     return true;
 }
-// Returns the installation ID, or zero for a null client.
+/** Returns the installation ID, or zero for a null client. */
 ;;GETTER
-u64 SeshClient_getId(const SeshClient *self) { return self == nullptr ? 0 : (*self).id; }
-// Formats the installation ID as a bounded value summary.
+u64 SeshClient_getId(const SeshClient *self)
+{
+    return self == nullptr ? 0 : (*self).id;
+}
+/** Formats the installation ID as a bounded value summary. */
 SESH_VALUE_STRING(SeshClient, SeshText_format(dest, cap, outTruncated, "client %llu", (u64) SeshClient_getId(self)))
-// Formats the client's field names and values into a bounded buffer.
-bool SeshClient_toStringStruct(const SeshClient *self, char *dest, bytes cap, bool *outTruncated) {
+/** Formats the client's field names and values into a bounded buffer. */
+bool SeshClient_toStringStruct(const SeshClient *self, utf8 *dest, bytes cap, bool *outTruncated) {
     return self == nullptr ? SeshText_format(dest, cap, outTruncated, "nullptr") :
         SeshText_format(dest, cap, outTruncated, "SeshClient{id=%llu}", (u64) SeshClient_getId(self));
 }
