@@ -1,4 +1,4 @@
-# SECURITY.md — sesh
+# SECURITY.md, sesh
 
 > **Internal invariant set, not a public disclosure channel.** See the
 > [vexgraph security baseline](../../SECURITY.md) for everything inherited
@@ -10,10 +10,10 @@ those are the API-haven connector's and the host's.
 
 ## Surface
 
-- **Outbound uploads** — caller-owned snapshot bytes are handed to a
+- **Outbound uploads**, caller-owned snapshot bytes are handed to a
   provider-neutral callback (`storage/snapshot_io.h`) that API-haven implements.
   Sesh never speaks HTTPS or OAuth itself.
-- **Local session state** — identities, revisions and a copied
+- **Local session state**, identities, revisions and a copied
   intent/receipt ledger in host-owned storage.
 
 ## Secrets
@@ -26,7 +26,7 @@ those are the API-haven connector's and the host's.
 
 ## Authorization is local, and it is stated as local
 
-- A principal id is derived through authenticate/revoke only — there is no raw
+- A principal id is derived through authenticate/revoke only, there is no raw
   setter to forge one.
 - Expected-revision checks, replay protection and operation identity are **local**
   guarantees. They are not remote authorization, not a distributed CAS, and not
