@@ -4,6 +4,7 @@
  */
 
 #include "vex.h"
+#include "re/primitive/vex-string.h"
 #include "snapshot/snapshot.h"
 #include "test/snapshot/snapshot_test.h"
 #include <assert.h>
@@ -107,7 +108,7 @@ static i32 get(any context, u64 key, u8 *dest, bytes capacity, bytes *outLength)
 }
 
 /* Covers public configuration, fixture round-trip, retry timing, cancellation, boundaries, and projections. */
-static fn normal(const utf8 *fixture) {
+static fn normal(string fixture) {
     SeshSnapshot job = SeshSnapshot();
     SeshSnapshot direct = SeshSnapshot_0();
     SeshSnapshot zero = SeshSnapshot_zero();
@@ -181,16 +182,16 @@ static fn normal(const utf8 *fixture) {
     utf8 text[512];
     bool truncated = true;
     assert(SeshSnapshot_toString(&job, text, sizeof(text), &truncated) && !truncated);
-    assert(strstr(text, "snapshot 4") != nullptr);
+    assert(string_contains(text, "snapshot 4"));
     assert(SeshSnapshot_toStringStruct(&job, text, sizeof(text), nullptr));
-    const utf8 *fields[] = {"buffer=", "capacity=", "length=", "put=", "context=", "key=", "nextAttemptMs=", "retryDelayMs=", "attempts=", "maxAttempts=", "state="};
-    const utf8 *cursor = text;
+    string fields[] = {"buffer=", "capacity=", "length=", "put=", "context=", "key=", "nextAttemptMs=", "retryDelayMs=", "attempts=", "maxAttempts=", "state="};
+    string cursor = text;
     for (bytes i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
-        cursor = strstr(cursor, fields[i]);
+        cursor = string_find(cursor, fields[i]);
         assert(cursor != nullptr);
         cursor += strlen(fields[i]);
     }
-    assert(SeshSnapshot_toString(nullptr, text, 8, &truncated) && strcmp(text, "nullptr") == 0);
+    assert(SeshSnapshot_toString(nullptr, text, 8, &truncated) && string_equals(text, "nullptr"));
     assert(SeshSnapshot_toStringStruct(nullptr, text, 8, nullptr));
     puts("PASS: fixture round trip, pending/retry/cancel, boundaries and public projections");
 }
@@ -254,7 +255,7 @@ static fn invalid() {
 /* Selects the normal snapshot contract suite or its cold-rejection suite. */
 static i32 suite_snapshot(i32 argc, utf8 **argv) {
     assert(argc == 2);
-    if (strcmp(argv[1], "invalid") == 0)
+    if (string_equals(argv[1], "invalid"))
         invalid();
     else
         normal(argv[1]);
@@ -320,7 +321,7 @@ static i32 suite_auth_service(i32 argc, utf8 **argv) {
     assert(AuthService_authenticate(&auth) && AuthService_getPrincipalId(&auth) == 7);
     utf8 text[512];
     assert(AuthService_toStringStruct(&auth, text, sizeof(text), nullptr));
-    assert(strstr(text, credential.credential) == nullptr && strstr(text, "auth=redacted,verifier=bound,context=redacted,principalId=7"));
+    assert(!string_contains(text, credential.credential) && string_find(text, "auth=redacted,verifier=bound,context=redacted,principalId=7"));
     PROJECTIONS(AuthService, auth, "principalId=7");
     assert(AuthService_setAuth(&auth, &credential) && !AuthService_isAuthenticated(&auth));
     assert(AuthService_authenticate(&auth));
@@ -760,16 +761,16 @@ static i32 suite_sesh_entry() {
 static i32 suite_text(i32 argc, utf8 **argv) {
     utf8 text[5]; bool truncated = true;
     assert(SeshText_format(text, sizeof(text), &truncated, "%s", "text") && !truncated);
-    assert(strcmp(text, "text") == 0);
+    assert(string_equals(text, "text"));
     assert(SeshText_format(text, sizeof(text), nullptr, "%d", 0));
     utf8 ten[11];
     assert(SeshText_format(ten, sizeof(ten), nullptr, "%d%d%d%d%d%d%d%d%d%d", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
-    assert(strcmp(ten, "0123456789") == 0);
-    if (argc == 2 && strcmp(argv[1], "invalid") == 0) {
+    assert(string_equals(ten, "0123456789"));
+    if (argc == 2 && string_equals(argv[1], "invalid")) {
         assert(!SeshText_format(nullptr, 5, &truncated, "%s", "text") && truncated);
         assert(!SeshText_format(text, 0, &truncated, "%s", "text") && truncated);
         assert(!SeshText_format(text, 4, &truncated, "%s", "text") && truncated);
-        assert(strcmp(text, "tex") == 0);
+        assert(string_equals(text, "tex"));
         assert(!SeshText_format(text, 1, nullptr, "%s", "text") && text[0] == '\0');
         assert(!SeshText_format(text, sizeof(text), &truncated, nullptr) && !truncated && text[0] == '\0');
     }
@@ -828,12 +829,12 @@ i32 main(i32 argc, utf8 **argv) {
         { "text", suite_text_entry },
         { "workspace", suite_workspace_entry },
     };
-    const utf8 *filter = argc > 1 ? argv[1] : nullptr;
+    string filter = argc > 1 ? argv[1] : nullptr;
     bytes ran = 0;
     i32 failed = 0;
 
     for (bytes i = 0; i < sizeof(suites) / sizeof(suites[0]); i++) {
-        if (filter && strcmp(filter, suites[i].name) != 0)
+        if (filter && !string_equals(filter, suites[i].name))
             continue;
         if (suites[i].run() != 0)
             failed++;
@@ -841,11 +842,11 @@ i32 main(i32 argc, utf8 **argv) {
     }
 
     if (filter && ran == 0) {
-        fprintf(stderr, "sesh_test: unknown suite '%s'\n", filter);
+        fprint(stderr, "sesh_test: unknown suite '", filter, "'");
         return 2;
     }
     if (failed != 0) {
-        fprintf(stderr, "sesh_test: %d suite(s) FAILED\n", failed);
+        fprint(stderr, "sesh_test: ", failed, " suite(s) FAILED");
         return 1;
     }
     puts("sesh_test: PASS");

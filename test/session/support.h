@@ -3,7 +3,7 @@
 
 #include "vex.h"
 #include "lang/sesh.h"
-#include "primitive/char_sequence.h"
+#include "re/primitive/vex-string.h"
 #include <assert.h>
 #include <pthread.h>
 #include <string.h>
@@ -43,9 +43,9 @@ static inline bool verify(const ApiAuth *auth, any context, u64 *dest) {
     utf8 text[512]; bool truncated = true; \
     assert(Class##_toString(&(object), text, sizeof(text), &truncated) && !truncated); \
     assert(Class##_toStringStruct(&(object), text, sizeof(text), nullptr)); \
-    assert(CharSequence_find(CharSequence_cstr(text), CharSequence_cstr(fieldText)) != SIZE_MAX); \
+    assert(string_indexOf(text, fieldText) != SIZE_MAX); \
     assert(Class##_toString(nullptr, text, 8, &truncated) && !truncated); \
-    assert(CharSequence_compare(CharSequence_cstr(text), CharSequence_cstr("nullptr")) == 0); \
+    assert(string_compare(text, "nullptr") == 0); \
     assert(Class##_toStringStruct(nullptr, text, 8, nullptr)); \
 } while (0)
 
@@ -56,6 +56,6 @@ static inline bool verify(const ApiAuth *auth, any context, u64 *dest) {
     assert(!Class##_toString(&(object), text, 1, &truncated) && truncated && text[0] == '\0'); \
 } while (0)
 
-#define INVALID_MODE (argc == 2 && CharSequence_compare(CharSequence_cstr(argv[1]), CharSequence_cstr("invalid")) == 0)
+#define INVALID_MODE (argc == 2 && string_compare(argv[1], "invalid") == 0)
 
 #endif
